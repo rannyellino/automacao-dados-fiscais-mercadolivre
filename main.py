@@ -2,24 +2,68 @@ import pyautogui
 import pyperclip
 import time
 import webbrowser
+from tkinter import *
 
 def main():
-    link_planilha_anuncios = input(r"Link da planilha de ANÚNCIOS: ")
-    link_planilha_EAN = input(r"Link da planilha com os EANS: ")
-    linha_coluna_anuncios = input("Qual célula começa os ANÚNCIOS: ")
-    linha_coluna_ean = input("Qual célula começa os EAN disponiveis: ")
-    qtd_anuncios = int(input("Quantos anúncios é para preencher o EAN: "))
+    #Criando interface
+    janela = Tk() #Criando Janela
+    janela.title("Automatização de Dados Fiscais e EAN - MercadoLivre") #Alterando o título da Janela
+
+    texto_orientacao = Label(janela, text="Preencha todos os campos abaixo e após isso clique no botão para começar o processo!!!\n\nEste programa foi feito"
+                                          " com o intuito de ajudar quem precisa preencher varios dados fiscais de varios anuncios e em vez de fazer tudo isso "
+                                          "a mão\n eu @rannyellino decidi fazer um robo que fizesse isso tudo de forma automatizada onde você apenas precisaria "
+                                          "indicar atraves de planilhas quais\n lista de anuncios ele vai trabalhar e quais EANs ele tem que usar\n") #Criando um texto
+    texto_orientacao.grid(column=0, row=0) #Indicando posição do texto
+
+    texto_link_planilha_anuncios = Label(janela, text="Coloque o link da planilha de anuncios")
+    texto_link_planilha_anuncios.grid(column=0, row=1)
+    entry_link_planilha_anuncios = Entry(janela, width=110) #Input para o link da planilha
+    entry_link_planilha_anuncios.grid(column=0, row=2)
+
+    texto_link_planilha_EAN = Label(janela, text="Coloque o link da planilha de EAN")
+    texto_link_planilha_EAN.grid(column=0, row=3)
+    entry_link_planilha_EAN = Entry(janela, width=110) #Input para o link da planilha
+    entry_link_planilha_EAN.grid(column=0, row=4)
+
+    texto_linha_coluna_anuncios = Label(janela, text="Em qual célula começa os Anúcnios")
+    texto_linha_coluna_anuncios.grid(column=0, row=5)
+    entry_linha_coluna_anuncios = Entry(janela, width=20) #Input para qual célula começa os anuncios
+    entry_linha_coluna_anuncios.grid(column=0, row=6)
+
+    texto_linha_coluna_ean = Label(janela, text="Em qual célula começa os EAN disponiveis")
+    texto_linha_coluna_ean.grid(column=0, row=7)
+    entry_linha_coluna_ean = Entry(janela, width=20) #Input para qual célula começa os EAN
+    entry_linha_coluna_ean.grid(column=0, row=8)
+
+    texto_linha_qtd_anuncios = Label(janela, text="Quantidade de anuncios que você quer alterar")
+    texto_linha_qtd_anuncios.grid(column=0, row=9)
+    entry_qtd_anuncios = Entry(janela, width=20) #Input para saber quantos anuncios editar
+    entry_qtd_anuncios.grid(column=0, row=10)
+
+    botao = Button(janela, text="Começar processo", command=lambda: pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios))
+    botao.grid(column=0, row=11) #Indicando posição para o botão
+    janela.mainloop() #Deixando a janela aberta
+
+def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios):
+    #Puxando todos valores do input da interface
+    link_planilha_anuncios = entry_link_planilha_anuncios.get()
+    link_planilha_EAN = entry_link_planilha_EAN.get()
+    linha_coluna_anuncios = entry_linha_coluna_anuncios.get()
+    linha_coluna_ean = entry_linha_coluna_ean.get()
+    qtd_anuncios = entry_qtd_anuncios.get()
+
     ncm = "87089200"
     cest = "0107500"
 
-    preenchendo_EAN(link_planilha_anuncios,link_planilha_EAN,linha_coluna_anuncios,linha_coluna_ean, ncm, cest, qtd_anuncios)
+    #Começando a preencher os EAN com base nos valores puxados
+    preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios)
 
 def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios):
     # Aba de Anuncios do MercadoLivre
     anuncios = r"https://www.mercadolivre.com.br/anuncios/lista?filters=CHANNEL_ONLY_MARKETPLACE|CHANNEL_MARKETPLACE_MSHOPS&page=1&sort=DEFAULT"
     primeiroCiclo = True
     em_processo = True
-    total_anuncios = qtd_anuncios
+    total_anuncios = int(qtd_anuncios)
 
     abrindo_navegador()
 
@@ -249,7 +293,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         #print(em_processo)
         if(qtd_anuncios == 0):
             em_processo = False
-            print("Processo finalizado foi preenchido o EAN de {} anúncios")
+            print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
 
 def abrindo_navegador():
     # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)

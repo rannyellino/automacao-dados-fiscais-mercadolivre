@@ -15,6 +15,7 @@ def main():
                                           "indicar atraves de planilhas quais\n lista de anuncios ele vai trabalhar e quais EANs ele tem que usar\n") #Criando um texto
     texto_orientacao.grid(column=0, row=0) #Indicando posição do texto
 
+
     texto_link_planilha_anuncios = Label(janela, text="Coloque o link da planilha de anuncios")
     texto_link_planilha_anuncios.grid(column=0, row=1)
     entry_link_planilha_anuncios = Entry(janela, width=110) #Input para o link da planilha
@@ -40,31 +41,43 @@ def main():
     entry_qtd_anuncios = Entry(janela, width=20) #Input para saber quantos anuncios editar
     entry_qtd_anuncios.grid(column=0, row=10)
 
-    botao = Button(janela, text="Começar processo", command=lambda: pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios))
-    botao.grid(column=0, row=11) #Indicando posição para o botão
+    #Selecionar Conta, 1 = ScapJá, 2 = SoEscap
+    texto_conta = Label(janela, text="Qual conta será usada ? 1 = ScapJá, 2 = SoEscap")
+    texto_conta.grid(column=0, row=11)
+    entry_conta = Entry(janela, width=20)  # Input para saber quantos anuncios editar
+    entry_conta.grid(column=0, row=12)
+
+    botao = Button(janela, text="Começar processo", command=lambda: pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela))
+    botao.grid(column=0, row=13) #Indicando posição para o botão
+
     janela.mainloop() #Deixando a janela aberta
 
-def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios):
+def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela):
     #Puxando todos valores do input da interface
     link_planilha_anuncios = entry_link_planilha_anuncios.get()
     link_planilha_EAN = entry_link_planilha_EAN.get()
     linha_coluna_anuncios = entry_linha_coluna_anuncios.get()
     linha_coluna_ean = entry_linha_coluna_ean.get()
     qtd_anuncios = entry_qtd_anuncios.get()
+    conta = entry_conta.get()
+    janela = janela
+    print(conta)
 
     ncm = "87089200"
     cest = "0107500"
 
     #Começando a preencher os EAN com base nos valores puxados
-    preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios)
+    preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela)
 
-def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios):
+def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela):
     # Aba de Anuncios do MercadoLivre
     anuncios = r"https://www.mercadolivre.com.br/anuncios/lista?filters=CHANNEL_ONLY_MARKETPLACE|CHANNEL_MARKETPLACE_MSHOPS&page=1&sort=DEFAULT" #É o mesmo link indepedente da conta
     dados_fiscais = r"https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB" #link para entrar na parte fiscal de um anúncio
     primeiroCiclo = True
     em_processo = True
     qtd_anuncios_number = int(qtd_anuncios)
+    print(conta)
+    print(type(conta))
     print(qtd_anuncios_number)
     print(type(qtd_anuncios_number))
 
@@ -180,10 +193,19 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         pausa_curta()  # Espera segundos por precaução
 
         #Copiando SKU
-        pyautogui.hotkey("down")
-        um_segundo() # Espera segundos por precaução
-        pyautogui.hotkey("down") #Chegando até o SKU
-        copiar()
+        if(conta == "1"): #Se for ScapJá
+            pyautogui.hotkey("down")
+            um_segundo() # Espera segundos por precaução
+            pyautogui.hotkey("down") #Chegando até o SKU
+            copiar()
+            um_segundo()
+        elif(conta == "2"): #Se for SoEscap
+            pyautogui.hotkey("down")
+            um_segundo()  # Espera segundos por precaução
+            copiar()
+            um_segundo()
+        else:
+            exit()
 
         # Ir para a aba do Mercado Livre
         mudar_aba_frente()
@@ -248,26 +270,37 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         pyautogui.hotkey("Tab")
         pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS
         um_segundo()  # Espera segundos por precaução
-        pyautogui.hotkey("Down")
-        pyautogui.hotkey("Down")
-        pyautogui.hotkey("Down")
-        pyautogui.hotkey("Down") #Chegando na opção certa
-        um_segundo()  # Espera segundos por precaução
-        pyautogui.hotkey("Enter")  #Selecionando 500
-        um_segundo()  # Espera segundos por precaução
+
+        if(conta == "1"): # Se for ScapJá
+            pyautogui.hotkey("Down")
+            pyautogui.hotkey("Down")
+            pyautogui.hotkey("Down")
+            pyautogui.hotkey("Down") #Chegando na opção certa
+            um_segundo()  # Espera segundos por precaução
+            pyautogui.hotkey("Enter")  #Selecionando 500
+            um_segundo()  # Espera segundos por precaução
+        elif(conta == "2"): # Se for SoEscap
+            pyautogui.hotkey("Down") #Chegando na opção certa
+            um_segundo()
+            pyautogui.hotkey("Enter")
+            um_segundo()
 
         #Preenchendo nas planilhas de anuncios e de EAN
-
         #Voltando para a planilha de anúncios
         mudar_aba_atras()
         mudar_aba_atras()
 
         pausa_curta() # Espera segundos por precaução
 
-        pyautogui.hotkey("up")
-        um_segundo()
-        pyautogui.hotkey("up") #Volta para o código do anúncio
-        copiar()
+        if (conta == "1"):  # Se for ScapJá
+            pyautogui.hotkey("up")
+            um_segundo()
+            pyautogui.hotkey("up") #Volta para o código do anúncio
+            copiar()
+        elif (conta == "2"):  # Se for SoEscap
+            pyautogui.hotkey("up")
+            um_segundo()
+            copiar()
 
         #Vai até a aba de EAN
         mudar_aba_frente()
@@ -278,8 +311,12 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         um_segundo()
         pyautogui.click(x=710, y=186)
         um_segundo()
-        pyautogui.click(x=807, y=373) #Pinta de verde para indicar que é a conta SCAPJÁ
-        um_segundo()
+        if(conta == "1"): #Se for ScapJá
+            pyautogui.click(x=807, y=373) #Pinta de verde para indicar que é a conta SCAPJÁ
+            um_segundo()
+        elif(conta == "2"):
+            pyautogui.click(x=783, y=378)  # Pinta de amarelo para indicar que é a conta SoEscap
+            um_segundo()
 
         #Vai até a aba de ANÚNCIOS
         mudar_aba_atras()
@@ -288,7 +325,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         pyautogui.hotkey("right")
         pyautogui.click(x=710, y=186)
         um_segundo()
-        pyautogui.click(x=807, y=373)  # Pinta de verde para indicar que preencheu o EAN
+        pyautogui.click(x=807, y=373)  # Pinta de verde para indicar que finalizou o processo de preencher dados fiscais e EAN
         um_segundo()
         pyautogui.hotkey("left")
 
@@ -311,6 +348,8 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         #print(primeiroCiclo)
         #print(em_processo)
         if(qtd_anuncios_number == 0):
+            finalizado = Label(janela, text="Processo Finalizado!!!")
+            finalizado.grid(column=0, row=14)
             em_processo = False
             #print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
 

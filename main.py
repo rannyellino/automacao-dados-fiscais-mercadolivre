@@ -3,6 +3,12 @@ import pyperclip
 import time
 import webbrowser
 from tkinter import *
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 def main():
     #Criando interface
@@ -81,7 +87,9 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
     print(qtd_anuncios_number)
     print(type(qtd_anuncios_number))
 
-    abrindo_navegador()
+    chrome = abrindo_navegador()
+    chrome.maximize_window()
+    print(chrome)
 
     pausa_curta() #Espera segundos por precaução
 
@@ -177,185 +185,206 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         pausa_longa()
 
         pyautogui.click(x=502, y=321)
-        pausa_curta()  # Espera segundos por precaução
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab")
+        pausa_curta()  # Espera segundos por precaução x=409, y=370
+        pyautogui.click(x=409, y=370) # Clica no SKU que é o primeiro campo
+        pyautogui.hotkey("ctrl", "a") # Seleciona todo valor do campo
+        pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
+        text_copiado = janela.clipboard_get() #Pega o valor copiado e coloca em uma váriavel
+        if(text_copiado == ""):
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
 
-        #Preenchendo os dados fiscais dos anuncios
+            #Preenchendo os dados fiscais dos anuncios
 
-        #Volta para a aba dos anúncios
-        mudar_aba_atras()
-        mudar_aba_atras()
+            #Volta para a aba dos anúncios
+            mudar_aba_atras()
+            mudar_aba_atras()
 
-        pausa_curta()  # Espera segundos por precaução
+            pausa_curta()  # Espera segundos por precaução
 
-        #Copiando SKU
-        if(conta == "1"): #Se for ScapJá
-            pyautogui.hotkey("down")
-            um_segundo() # Espera segundos por precaução
-            pyautogui.hotkey("down") #Chegando até o SKU
-            copiar()
-            um_segundo()
-        elif(conta == "2"): #Se for SoEscap
-            pyautogui.hotkey("down")
+            #Copiando SKU
+            if(conta == "1"): #Se for ScapJá
+                pyautogui.hotkey("down")
+                um_segundo() # Espera segundos por precaução
+                pyautogui.hotkey("down") #Chegando até o SKU
+                copiar()
+                um_segundo()
+            elif(conta == "2"): #Se for SoEscap
+                pyautogui.hotkey("down")
+                um_segundo()  # Espera segundos por precaução
+                copiar()
+                um_segundo()
+            else:
+                exit()
+
+            # Ir para a aba do Mercado Livre
+            mudar_aba_frente()
+            mudar_aba_frente()
+
+            pausa_curta() # Espera segundos por precaução
+
+            #Colando SKU
+            colar_link()
+
+            #Voltando para a aba dos EAN
+            mudar_aba_atras()
+
+            pausa_curta()  # Espera segundos por precaução
+
+            #Copiando EAN
+            if(primeiroCiclo):
+                pyautogui.hotkey("left")  # Chegando até o EAN
+                copiar()
+                pyautogui.hotkey("right") # Voltando para preencher o código do anuncio depois
+            else:
+                pyautogui.hotkey("down")
+                pyautogui.hotkey("left")  # Chegando até o EAN
+                copiar()
+                pyautogui.hotkey("right")  # Voltando para preencher o código do anuncio depois
+
+            # Ir para a aba do Mercado Livre
+            mudar_aba_frente()
+
+            pausa_curta()  # Espera segundos por precaução
+
+            #Colando EAN
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab") # Chegou até o campo EAN
+            colar_link()
+
             um_segundo()  # Espera segundos por precaução
+
+            #Copiando nome do produto
+            pyautogui.click(x=1271, y=278, clicks=3)
             copiar()
+
+            #Indo até o campo nome do produto e colando
+            pyautogui.click(x=411, y=671)
+            colar_link()
+
+            #Preenchendo Outros Dados
+            pyautogui.hotkey("Tab")
+            pyautogui.write(ncm) #Preenchendo NCM
+            um_segundo()  # Espera segundos por precaução
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+            pyautogui.write(cest) #Preenchendo CEST
+            um_segundo()  # Espera segundos por precaução
+            pyautogui.hotkey("Tab")
+            pyautogui.click(x=548, y=912) #Abrindo opções de origem
+            um_segundo()  # Espera segundos por precaução
+            pyautogui.hotkey("Down")
+            pyautogui.hotkey("Enter") #Selecionando Nacional
+            um_segundo()  # Espera segundos por precaução
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS
+            um_segundo()  # Espera segundos por precaução
+
+            if(conta == "1"): # Se for ScapJá
+                pyautogui.hotkey("Down")
+                pyautogui.hotkey("Down")
+                pyautogui.hotkey("Down")
+                pyautogui.hotkey("Down") #Chegando na opção certa
+                um_segundo()  # Espera segundos por precaução
+                pyautogui.hotkey("Enter")  #Selecionando 500
+                um_segundo()  # Espera segundos por precaução
+            elif(conta == "2"): # Se for SoEscap
+                pyautogui.hotkey("Down") #Chegando na opção certa
+                um_segundo()
+                pyautogui.hotkey("Enter")
+                um_segundo()
+
+            #Preenchendo nas planilhas de anuncios e de EAN
+            #Voltando para a planilha de anúncios
+            mudar_aba_atras()
+            mudar_aba_atras()
+
+            pausa_curta() # Espera segundos por precaução
+
+            if (conta == "1"):  # Se for ScapJá
+                pyautogui.hotkey("up")
+                um_segundo()
+                pyautogui.hotkey("up") #Volta para o código do anúncio
+                copiar()
+            elif (conta == "2"):  # Se for SoEscap
+                pyautogui.hotkey("up")
+                um_segundo()
+                copiar()
+
+            #Vai até a aba de EAN
+            mudar_aba_frente()
+            pausa_curta()  # Espera segundos por precaução
+
+            #Cola o código do anúncio ao EAN referente
+            colar_link() #Cola o código do anúncio que editou o EAN
             um_segundo()
+            pyautogui.click(x=710, y=186)
+            um_segundo()
+            if(conta == "1"): #Se for ScapJá
+                pyautogui.click(x=807, y=373) #Pinta de verde para indicar que é a conta SCAPJÁ
+                um_segundo()
+            elif(conta == "2"):
+                pyautogui.click(x=783, y=378)  # Pinta de amarelo para indicar que é a conta SoEscap
+                um_segundo()
+
+            #Vai até a aba de ANÚNCIOS
+            mudar_aba_atras()
+            pausa_curta()
+
+            pyautogui.hotkey("right")
+            pyautogui.click(x=710, y=186)
+            um_segundo()
+            pyautogui.click(x=807, y=373)  # Pinta de verde para indicar que finalizou o processo de preencher dados fiscais e EAN
+            um_segundo()
+            pyautogui.hotkey("left")
+
+            #Indo até a ABA do MercadoLivre
+            mudar_aba_frente()
+            mudar_aba_frente()
+
+            pausa_curta()
+
+            #Salvando os dados fiscais e voltando para a página de anuncios normal
+            pyautogui.click(x = 461, y = 816)
+            qtd_anuncios_number = qtd_anuncios_number - 1
+            print(qtd_anuncios_number)
+            #print(qtd_anuncios)
+            pausa_curta()
+            pyautogui.click(x=748, y=570) #Voltando para a lista de anuncios
+            pausa_longa()
+
+            primeiroCiclo = False;
+            #print(primeiroCiclo)
+            #print(em_processo)
+            if(qtd_anuncios_number == 0):
+                finalizado = Label(janela, text="Processo Finalizado!!!")
+                finalizado.grid(column=0, row=14)
+                em_processo = False
+                #print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
         else:
-            exit()
-
-        # Ir para a aba do Mercado Livre
-        mudar_aba_frente()
-        mudar_aba_frente()
-
-        pausa_curta() # Espera segundos por precaução
-
-        #Colando SKU
-        colar_link()
-
-        #Voltando para a aba dos EAN
-        mudar_aba_atras()
-
-        pausa_curta()  # Espera segundos por precaução
-
-        #Copiando EAN
-        if(primeiroCiclo):
-            pyautogui.hotkey("left")  # Chegando até o EAN
-            copiar()
-            pyautogui.hotkey("right") # Voltando para preencher o código do anuncio depois
-        else:
-            pyautogui.hotkey("down")
-            pyautogui.hotkey("left")  # Chegando até o EAN
-            copiar()
-            pyautogui.hotkey("right")  # Voltando para preencher o código do anuncio depois
-
-        # Ir para a aba do Mercado Livre
-        mudar_aba_frente()
-
-        pausa_curta()  # Espera segundos por precaução
-
-        #Colando EAN
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab") # Chegou até o campo EAN
-        colar_link()
-
-        um_segundo()  # Espera segundos por precaução
-
-        #Copiando nome do produto
-        pyautogui.click(x=1271, y=278, clicks=3)
-        copiar()
-
-        #Indo até o campo nome do produto e colando
-        pyautogui.click(x=411, y=671)
-        colar_link()
-
-        #Preenchendo Outros Dados
-        pyautogui.hotkey("Tab")
-        pyautogui.write(ncm) #Preenchendo NCM
-        um_segundo()  # Espera segundos por precaução
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab")
-        pyautogui.write(cest) #Preenchendo CEST
-        um_segundo()  # Espera segundos por precaução
-        pyautogui.hotkey("Tab")
-        pyautogui.click(x=548, y=912) #Abrindo opções de origem
-        um_segundo()  # Espera segundos por precaução
-        pyautogui.hotkey("Down")
-        pyautogui.hotkey("Enter") #Selecionando Nacional
-        um_segundo()  # Espera segundos por precaução
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Tab")
-        pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS
-        um_segundo()  # Espera segundos por precaução
-
-        if(conta == "1"): # Se for ScapJá
-            pyautogui.hotkey("Down")
-            pyautogui.hotkey("Down")
-            pyautogui.hotkey("Down")
-            pyautogui.hotkey("Down") #Chegando na opção certa
-            um_segundo()  # Espera segundos por precaução
-            pyautogui.hotkey("Enter")  #Selecionando 500
-            um_segundo()  # Espera segundos por precaução
-        elif(conta == "2"): # Se for SoEscap
-            pyautogui.hotkey("Down") #Chegando na opção certa
-            um_segundo()
-            pyautogui.hotkey("Enter")
-            um_segundo()
-
-        #Preenchendo nas planilhas de anuncios e de EAN
-        #Voltando para a planilha de anúncios
-        mudar_aba_atras()
-        mudar_aba_atras()
-
-        pausa_curta() # Espera segundos por precaução
-
-        if (conta == "1"):  # Se for ScapJá
-            pyautogui.hotkey("up")
-            um_segundo()
-            pyautogui.hotkey("up") #Volta para o código do anúncio
-            copiar()
-        elif (conta == "2"):  # Se for SoEscap
-            pyautogui.hotkey("up")
-            um_segundo()
-            copiar()
-
-        #Vai até a aba de EAN
-        mudar_aba_frente()
-        pausa_curta()  # Espera segundos por precaução
-
-        #Cola o código do anúncio ao EAN referente
-        colar_link() #Cola o código do anúncio que editou o EAN
-        um_segundo()
-        pyautogui.click(x=710, y=186)
-        um_segundo()
-        if(conta == "1"): #Se for ScapJá
-            pyautogui.click(x=807, y=373) #Pinta de verde para indicar que é a conta SCAPJÁ
-            um_segundo()
-        elif(conta == "2"):
-            pyautogui.click(x=783, y=378)  # Pinta de amarelo para indicar que é a conta SoEscap
-            um_segundo()
-
-        #Vai até a aba de ANÚNCIOS
-        mudar_aba_atras()
-        pausa_curta()
-
-        pyautogui.hotkey("right")
-        pyautogui.click(x=710, y=186)
-        um_segundo()
-        pyautogui.click(x=807, y=373)  # Pinta de verde para indicar que finalizou o processo de preencher dados fiscais e EAN
-        um_segundo()
-        pyautogui.hotkey("left")
-
-        #Indo até a ABA do MercadoLivre
-        mudar_aba_frente()
-        mudar_aba_frente()
-
-        pausa_curta()
-
-        #Salvando os dados fiscais e voltando para a página de anuncios normal
-        pyautogui.click(x = 461, y = 816)
-        qtd_anuncios_number = qtd_anuncios_number - 1
-        print(qtd_anuncios_number)
-        #print(qtd_anuncios)
-        pausa_curta()
-        pyautogui.click(x=748, y=570) #Voltando para a lista de anuncios
-        pausa_longa()
-
-        primeiroCiclo = False;
-        #print(primeiroCiclo)
-        #print(em_processo)
-        if(qtd_anuncios_number == 0):
-            finalizado = Label(janela, text="Processo Finalizado!!!")
-            finalizado.grid(column=0, row=14)
-            em_processo = False
-            #print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
+            qtd_anuncios_number = qtd_anuncios_number - 1
+            pausa_curta()
+            primeiroCiclo = False;
+            if (qtd_anuncios_number == 0):
+                finalizado = Label(janela, text="Processo Finalizado!!!")
+                finalizado.grid(column=0, row=14)
+                em_processo = False
+                # print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
 
 def abrindo_navegador():
     # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)
-    webbrowser.get().open(r'https://www.google.com.br/')
+    s = Service(ChromeDriverManager().install())
+    options = Options() #Para poder pegar o perfil do chrome
+    options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data") #Indicado diretorio do perfil do chrome
+    chrome = webdriver.Chrome(service=s, options=options) #Passando parametros do chrome
+    chrome.maximize_window()
+    chrome.get("https://google.com.br") #abri o chrome com o endereço indicado
+    print(chrome)
+    return chrome
 
 def um_segundo():
     time.sleep(1)

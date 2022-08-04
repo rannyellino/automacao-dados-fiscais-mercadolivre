@@ -87,8 +87,8 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
     print(qtd_anuncios_number)
     print(type(qtd_anuncios_number))
 
-    chrome = abrindo_navegador()
-    chrome.maximize_window()
+    chrome = abrindo_navegador() #Chamando a função com Selenium e recebendo o valor do chrome
+    chrome.maximize_window() #maximizando a janela
     print(chrome)
 
     pausa_curta() #Espera segundos por precaução

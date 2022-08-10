@@ -53,18 +53,25 @@ def main():
     entry_conta = Entry(janela, width=20)  # Input para saber quantos anuncios editar
     entry_conta.grid(column=0, row=12)
 
-    botao = Button(janela, text="Começar processo", command=lambda: pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela))
-    botao.grid(column=0, row=13) #Indicando posição para o botão
+    #Usuario do chrome
+    texto_user = Label(janela, text="Qual usuário do Chrome")
+    texto_user.grid(column=0, row=13)
+    entry_user = Entry(janela, width=20)  # Input para saber qual usuario vai puxar as configurações
+    entry_user.grid(column=0, row=14)
+
+    botao = Button(janela, text="Começar processo", command=lambda: pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela, entry_user))
+    botao.grid(column=0, row=16) #Indicando posição para o botão
 
     janela.mainloop() #Deixando a janela aberta
 
-def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela):
+def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela, entry_user):
     #Puxando todos valores do input da interface
     link_planilha_anuncios = entry_link_planilha_anuncios.get()
     link_planilha_EAN = entry_link_planilha_EAN.get()
     linha_coluna_anuncios = entry_linha_coluna_anuncios.get()
     linha_coluna_ean = entry_linha_coluna_ean.get()
     qtd_anuncios = entry_qtd_anuncios.get()
+    user = entry_user.get()
     conta = entry_conta.get()
     janela = janela
     print(conta)
@@ -73,9 +80,9 @@ def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry
     cest = "0107500"
 
     #Começando a preencher os EAN com base nos valores puxados
-    preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela)
+    preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela, user)
 
-def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela):
+def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela, user):
     # Aba de Anuncios do MercadoLivre
     anuncios = r"https://www.mercadolivre.com.br/anuncios/lista?filters=CHANNEL_ONLY_MARKETPLACE|CHANNEL_MARKETPLACE_MSHOPS&page=1&sort=DEFAULT" #É o mesmo link indepedente da conta
     dados_fiscais = r"https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB" #link para entrar na parte fiscal de um anúncio
@@ -87,7 +94,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
     print(qtd_anuncios_number)
     print(type(qtd_anuncios_number))
 
-    chrome = abrindo_navegador() #Chamando a função com Selenium e recebendo o valor do chrome
+    chrome = abrindo_navegador(user) #Chamando a função com Selenium e recebendo o valor do chrome
     chrome.maximize_window() #maximizando a janela
     print(chrome)
 
@@ -181,6 +188,8 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         #Colando o código MLB do anuncio e entrando na parte fiscal
         colar_link()
         pyautogui.hotkey("Enter")
+        mlb_copiado = janela.clipboard_get()
+        print("Trabalhando com o anúncio MLB{}".format(mlb_copiado))
 
         pausa_longa()
 
@@ -190,12 +199,14 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         pyautogui.hotkey("ctrl", "a") # Seleciona todo valor do campo
         pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
         text_copiado = janela.clipboard_get() #Pega o valor copiado e coloca em uma váriavel
-        if(text_copiado == ""):
+        print(text_copiado)
+        print(type(text_copiado))
+        if(text_copiado == mlb_copiado):
+            """pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
-            pyautogui.hotkey("Tab")
-            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")"""
 
             #Preenchendo os dados fiscais dos anuncios
 
@@ -258,11 +269,11 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             um_segundo()  # Espera segundos por precaução
 
             #Copiando nome do produto
-            pyautogui.click(x=1271, y=278, clicks=3)
+            pyautogui.click(x=1272, y=325, clicks=3)
             copiar()
 
             #Indo até o campo nome do produto e colando
-            pyautogui.click(x=411, y=671)
+            pyautogui.click(x=406, y=715)
             colar_link()
 
             #Preenchendo Outros Dados
@@ -274,7 +285,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             pyautogui.write(cest) #Preenchendo CEST
             um_segundo()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")
-            pyautogui.click(x=548, y=912) #Abrindo opções de origem
+            pyautogui.click(x=574, y=953) #Abrindo opções de origem
             um_segundo()  # Espera segundos por precaução
             pyautogui.hotkey("Down")
             pyautogui.hotkey("Enter") #Selecionando Nacional
@@ -322,13 +333,13 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             #Cola o código do anúncio ao EAN referente
             colar_link() #Cola o código do anúncio que editou o EAN
             um_segundo()
-            pyautogui.click(x=710, y=186)
+            pyautogui.click(x=710, y=233)
             um_segundo()
             if(conta == "1"): #Se for ScapJá
-                pyautogui.click(x=807, y=373) #Pinta de verde para indicar que é a conta SCAPJÁ
+                pyautogui.click(x=801, y=422) #Pinta de verde para indicar que é a conta SCAPJÁ
                 um_segundo()
             elif(conta == "2"):
-                pyautogui.click(x=783, y=378)  # Pinta de amarelo para indicar que é a conta SoEscap
+                pyautogui.click(x=783, y=421)  # Pinta de amarelo para indicar que é a conta SoEscap
                 um_segundo()
 
             #Vai até a aba de ANÚNCIOS
@@ -336,9 +347,9 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             pausa_curta()
 
             pyautogui.hotkey("right")
-            pyautogui.click(x=710, y=186)
+            pyautogui.click(x=710, y=233)
             um_segundo()
-            pyautogui.click(x=807, y=373)  # Pinta de verde para indicar que finalizou o processo de preencher dados fiscais e EAN
+            pyautogui.click(x=801, y=422)  # Pinta de verde para indicar que finalizou o processo de preencher dados fiscais e EAN
             um_segundo()
             pyautogui.hotkey("left")
 
@@ -349,12 +360,12 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             pausa_curta()
 
             #Salvando os dados fiscais e voltando para a página de anuncios normal
-            pyautogui.click(x = 461, y = 816)
+            pyautogui.click(x=466, y=813)
             qtd_anuncios_number = qtd_anuncios_number - 1
             print(qtd_anuncios_number)
             #print(qtd_anuncios)
             pausa_curta()
-            pyautogui.click(x=748, y=570) #Voltando para a lista de anuncios
+            pyautogui.click(x=748, y=573) #Voltando para a lista de anuncios
             pausa_longa()
 
             primeiroCiclo = False;
@@ -362,7 +373,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             #print(em_processo)
             if(qtd_anuncios_number == 0):
                 finalizado = Label(janela, text="Processo Finalizado!!!")
-                finalizado.grid(column=0, row=14)
+                finalizado.grid(column=0, row=15)
                 em_processo = False
                 #print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
         else:
@@ -371,15 +382,15 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             primeiroCiclo = False;
             if (qtd_anuncios_number == 0):
                 finalizado = Label(janela, text="Processo Finalizado!!!")
-                finalizado.grid(column=0, row=14)
+                finalizado.grid(column=0, row=15)
                 em_processo = False
                 # print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
 
-def abrindo_navegador():
+def abrindo_navegador(user):
     # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)
     s = Service(ChromeDriverManager().install())
     options = Options() #Para poder pegar o perfil do chrome
-    options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data") #Indicado diretorio do perfil do chrome
+    options.add_argument(r"user-data-dir=C:\Users\{}\AppData\Local\Google\Chrome\User Data".format(user)) #Indicado diretorio do perfil do chrome
     chrome = webdriver.Chrome(service=s, options=options) #Passando parametros do chrome
     chrome.maximize_window()
     chrome.get("https://google.com.br") #abri o chrome com o endereço indicado

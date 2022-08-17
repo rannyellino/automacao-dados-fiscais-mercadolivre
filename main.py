@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from datetime import datetime
 
 def main():
     #Criando interface
@@ -86,8 +87,10 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
     # Aba de Anuncios do MercadoLivre
     anuncios = r"https://www.mercadolivre.com.br/anuncios/lista?filters=CHANNEL_ONLY_MARKETPLACE|CHANNEL_MARKETPLACE_MSHOPS&page=1&sort=DEFAULT" #É o mesmo link indepedente da conta
     dados_fiscais = r"https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB" #link para entrar na parte fiscal de um anúncio
-    primeiroCiclo = True
-    em_processo = True
+    primeiroCiclo = True #Checar o primeiro ciclo
+    em_processo = True #saber se ainda está dentro do laço para preencher os dados fiscais
+    cod_finalizados = [] #Lista para colocar os códigos finalizados
+    cod_erros = [] #Lista para colocar os códigos com erro
     qtd_anuncios_number = int(qtd_anuncios)
     print(conta)
     print(type(conta))
@@ -194,20 +197,13 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
         pausa_longa()
 
         pyautogui.click(x=502, y=321)
-        pausa_curta()  # Espera segundos por precaução x=409, y=370
+        pausa_curta()  # Espera segundos por precaução
         pyautogui.click(x=409, y=370) # Clica no SKU que é o primeiro campo
         pyautogui.hotkey("ctrl", "a") # Seleciona todo valor do campo
         pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
         text_copiado = janela.clipboard_get() #Pega o valor copiado e coloca em uma váriavel
-        print(text_copiado)
-        print(type(text_copiado))
-        if(text_copiado == mlb_copiado):
-            """pyautogui.hotkey("Tab")
-            pyautogui.hotkey("Tab")
-            pyautogui.hotkey("Tab")
-            pyautogui.hotkey("Tab")
-            pyautogui.hotkey("Tab")"""
-
+        cod_atual = janela.clipboard_get()  # Pega o código MLB que está trabalhando
+        if(text_copiado == mlb_copiado): #Sistema de verificação simples que checa se existe algum valor no código SKU dos dados fiscais, caso haja significa que esse anuncio já foi feito os dados fiscais
             #Preenchendo os dados fiscais dos anuncios
 
             #Volta para a aba dos anúncios
@@ -361,6 +357,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
 
             #Salvando os dados fiscais e voltando para a página de anuncios normal
             pyautogui.click(x=466, y=813)
+            cod_finalizados.append(cod_atual)
             qtd_anuncios_number = qtd_anuncios_number - 1
             print(qtd_anuncios_number)
             #print(qtd_anuncios)
@@ -374,17 +371,35 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             if(qtd_anuncios_number == 0):
                 finalizado = Label(janela, text="Processo Finalizado!!!")
                 finalizado.grid(column=0, row=15)
+                criando_log(cod_finalizados,cod_erros)
                 em_processo = False
                 #print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
         else:
+            cod_erros.append(cod_atual)
             qtd_anuncios_number = qtd_anuncios_number - 1
             pausa_curta()
             primeiroCiclo = False;
             if (qtd_anuncios_number == 0):
                 finalizado = Label(janela, text="Processo Finalizado!!!")
                 finalizado.grid(column=0, row=15)
+                criando_log(cod_finalizados, cod_erros)
                 em_processo = False
                 # print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
+
+def criando_log(cod_finalizados, cod_erros):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S') #Pega a data e hora atual e já formata
+    nome_arquivo = 'Log '+str(data_hora)+'.txt' #Salva a data e hora atual formatada em STRING e adiciona a extensão que quero do arquivo TXT
+
+    if(cod_finalizados != []):
+        with open(nome_arquivo, "w") as arquivo: #Cria o arquivo TXT com o nome certo e começa a escrever em cada linha os códigos que ele finalizou o processo
+            for valor in cod_finalizados:
+                arquivo.write(str(valor)+" FINALIZADO" + "\n")
+
+    if (cod_erros != []):
+        with open(nome_arquivo, "a") as arquivo:
+            for valor in cod_erros:
+                arquivo.write(str(valor)+" VERIFICAR" + "\n")
+
 
 def abrindo_navegador(user):
     # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)

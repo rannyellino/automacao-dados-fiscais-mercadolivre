@@ -17,7 +17,7 @@ def teste():
     options = Options()
     options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data") #pega perfil do chrome
     chrome = webdriver.Chrome(service=s, options=options)
-    chrome = chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2762589755") #abri navegador na url
+    chrome = chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2759098128") #abri navegador na url
 
     time.sleep(10)
 

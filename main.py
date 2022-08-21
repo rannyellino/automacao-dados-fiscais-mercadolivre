@@ -125,6 +125,9 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
 
     # Laço para saber se já preencheu o EAN de todos os anúncios
     while (em_processo):
+        checa_catalisador = 0 #Variavel dedicada para o sistema de verificação se contém catalisador no anuncio ou não
+                              #Sempre ela vai iniciar com o valor de 0 em cada ciclo
+
         if(primeiroCiclo):
             # Volta para a aba dos anúncios
             mudar_aba_atras()
@@ -278,10 +281,9 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             # Checa se algumas das palavras do título contem a palavra catalisador para saber se precisa trocar os valores fiscais
             for texto in titulo_split:
                 if (texto == "catalisador"):
-                    ncm = "84213200"
+                    checa_catalisador = 1
                     print("É catalisador")
                 else:
-                    ncm = "87089200"
                     print("não é catalisador")
 
 
@@ -291,6 +293,10 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
 
             #Preenchendo Outros Dados
             pyautogui.hotkey("Tab")
+            if(checa_catalisador == 0):
+                ncm = "87089200"
+            else:
+                ncm = "84213200"
             pyautogui.write(ncm) #Preenchendo NCM
             pausa_curta()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")

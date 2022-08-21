@@ -270,6 +270,21 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             pyautogui.click(x=1272, y=325, clicks=3)
             copiar()
 
+            #Sistema de checagem para saber se é um catalisador ou não, caso seja precisa alterar o valor do NCM
+            titulo = janela.clipboard_get()  # coloca a copia do titulo dentro de uma variavel
+            titulo_pronto = titulo.casefold()  # transforma toda string em minusculo
+            titulo_split = titulo_pronto.rsplit(" ")  # separa a string dentro de uma lista separando cada valor entre um espaço " "
+
+            # Checa se algumas das palavras do título contem a palavra catalisador para saber se precisa trocar os valores fiscais
+            for texto in titulo_split:
+                if (texto == "catalisador"):
+                    ncm = "84213200"
+                    print("É catalisador")
+                else:
+                    ncm = "87089200"
+                    print("não é catalisador")
+
+
             #Indo até o campo nome do produto e colando
             pyautogui.click(x=406, y=715)
             colar_link()

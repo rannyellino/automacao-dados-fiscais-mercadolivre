@@ -13,12 +13,33 @@ from datetime import datetime
 
 def teste():
     janela = Tk()
-    s = Service(ChromeDriverManager().install())
+    s = Service(ChromeDriverManager().install()) #instala o drive do chrome que precisa
     options = Options()
-    options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data")
+    options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data") #pega perfil do chrome
     chrome = webdriver.Chrome(service=s, options=options)
-    chrome = chrome.get("https://www.mercadolivre.com.br/")
-    time.sleep(25)
+    chrome = chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2762589755") #abri navegador na url
+
+    time.sleep(10)
+
+    pyautogui.click(x=1272, y=325, clicks=3) # pega título do produto
+    copiar() #copia o titulo
+    titulo = janela.clipboard_get() #coloca a copia do titulo dentro de uma variavel
+
+    titulo_pronto = titulo.casefold() #transforma toda string em minusculo
+    print(titulo_pronto)
+    titulo_split = titulo_pronto.rsplit(" ") #separa a string dentro de uma lista separando cada valor entre um espaço " "
+    print(titulo_split)
+    print(type(titulo_split))
+
+    #Checa se algumas das palavras contem a palavra catalisador para saber se precisa trocar os valores fiscais
+    for texto in titulo_split:
+        if(texto == "catalisador"):
+            print(texto)
+            print("É catalisador")
+        else:
+            print(texto)
+            print("não é catalisador")
+
     mouse = pyautogui.position()
     print(mouse)
 
@@ -46,6 +67,9 @@ def teste2():
 
 def um_segundo():
     time.sleep(1)
+
+def copiar():
+    pyautogui.hotkey("ctrl", "c")
 
 if __name__ == '__main__':
     teste()

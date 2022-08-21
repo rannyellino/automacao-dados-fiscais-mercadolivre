@@ -1,7 +1,6 @@
 import pyautogui
 import pyperclip
 import time
-import webbrowser
 from tkinter import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -61,7 +60,7 @@ def main():
     entry_user.grid(column=0, row=14)
 
     botao = Button(janela, text="Começar processo", command=lambda: pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela, entry_user))
-    botao.grid(column=0, row=16) #Indicando posição para o botão
+    botao.grid(column=0, row=15) #Indicando posição para o botão
 
     janela.mainloop() #Deixando a janela aberta
 
@@ -85,7 +84,7 @@ def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry
 
 def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela, user):
     # Aba de Anuncios do MercadoLivre
-    anuncios = r"https://www.mercadolivre.com.br/anuncios/lista?filters=CHANNEL_ONLY_MARKETPLACE|CHANNEL_MARKETPLACE_MSHOPS&page=1&sort=DEFAULT" #É o mesmo link indepedente da conta
+    anuncios = r"" #É o mesmo link indepedente da conta
     dados_fiscais = r"https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB" #link para entrar na parte fiscal de um anúncio
     primeiroCiclo = True #Checar o primeiro ciclo
     em_processo = True #saber se ainda está dentro do laço para preencher os dados fiscais
@@ -101,7 +100,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
     chrome.maximize_window() #maximizando a janela
     print(chrome)
 
-    pausa_curta() #Espera segundos por precaução
+    pausa_longa() #Espera segundos por precaução
 
     # Abrindo cada planilha em uma nova ABA
     abrir_nova_aba()
@@ -118,6 +117,9 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
     pyperclip.copy(anuncios)
     colar_link()
     pyautogui.hotkey("enter") #Entrou no link dos anuncios dentro do ML
+
+    print("Abriu todas as abas que precisa")
+    print("Em processo {}".format(em_processo))
 
     pausa_curta() #Espera segundos por precaução
 
@@ -196,9 +198,9 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
 
         pausa_longa()
 
-        pyautogui.click(x=502, y=321)
+        pyautogui.click(x=502, y=350)
         pausa_curta()  # Espera segundos por precaução
-        pyautogui.click(x=409, y=370) # Clica no SKU que é o primeiro campo
+        pyautogui.click(x=409, y=412) # Clica no SKU que é o primeiro campo
         pyautogui.hotkey("ctrl", "a") # Seleciona todo valor do campo
         pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
         text_copiado = janela.clipboard_get() #Pega o valor copiado e coloca em uma váriavel
@@ -243,14 +245,14 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
 
             #Copiando EAN
             if(primeiroCiclo):
-                pyautogui.hotkey("left")  # Chegando até o EAN
-                copiar()
-                pyautogui.hotkey("right") # Voltando para preencher o código do anuncio depois
+                    pyautogui.hotkey("left")  # Chegando até o EAN
+                    copiar()
+                    pyautogui.hotkey("right") # Voltando para preencher o código do anuncio depois
             else:
-                pyautogui.hotkey("down")
-                pyautogui.hotkey("left")  # Chegando até o EAN
-                copiar()
-                pyautogui.hotkey("right")  # Voltando para preencher o código do anuncio depois
+                    pyautogui.hotkey("down")
+                    pyautogui.hotkey("left")  # Chegando até o EAN
+                    copiar()
+                    pyautogui.hotkey("right")  # Voltando para preencher o código do anuncio depois
 
             # Ir para a aba do Mercado Livre
             mudar_aba_frente()
@@ -275,7 +277,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             #Preenchendo Outros Dados
             pyautogui.hotkey("Tab")
             pyautogui.write(ncm) #Preenchendo NCM
-            um_segundo()  # Espera segundos por precaução
+            pausa_curta()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
             pyautogui.write(cest) #Preenchendo CEST
@@ -289,7 +291,7 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS
-            um_segundo()  # Espera segundos por precaução
+            time.sleep(1.25)  # Espera segundos por precaução
 
             if(conta == "1"): # Se for ScapJá
                 pyautogui.hotkey("Down")
@@ -300,8 +302,6 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
                 pyautogui.hotkey("Enter")  #Selecionando 500
                 um_segundo()  # Espera segundos por precaução
             elif(conta == "2"): # Se for SoEscap
-                pyautogui.hotkey("Down") #Chegando na opção certa
-                um_segundo()
                 pyautogui.hotkey("Enter")
                 um_segundo()
 
@@ -357,6 +357,8 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
 
             #Salvando os dados fiscais e voltando para a página de anuncios normal
             pyautogui.click(x=466, y=813)
+            um_segundo()
+            pyautogui.click(x=466, y=813) #Por conta de bug do ML clica de novo para salvar caso tenha erro na primeira vez
             cod_finalizados.append(cod_atual)
             qtd_anuncios_number = qtd_anuncios_number - 1
             print(qtd_anuncios_number)
@@ -370,18 +372,18 @@ def preenchendo_EAN(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anun
             #print(em_processo)
             if(qtd_anuncios_number == 0):
                 finalizado = Label(janela, text="Processo Finalizado!!!")
-                finalizado.grid(column=0, row=15)
+                finalizado.grid(column=0, row=16)
                 criando_log(cod_finalizados,cod_erros)
                 em_processo = False
                 #print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
         else:
-            cod_erros.append(cod_atual)
+            cod_erros.append(mlb_copiado)
             qtd_anuncios_number = qtd_anuncios_number - 1
             pausa_curta()
             primeiroCiclo = False;
             if (qtd_anuncios_number == 0):
                 finalizado = Label(janela, text="Processo Finalizado!!!")
-                finalizado.grid(column=0, row=15)
+                finalizado.grid(column=0, row=16)
                 criando_log(cod_finalizados, cod_erros)
                 em_processo = False
                 # print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
@@ -416,10 +418,10 @@ def um_segundo():
     time.sleep(1)
 
 def pausa_longa():
-    time.sleep(6)
+    time.sleep(6.5)
 
 def pausa_curta():
-    time.sleep(2.5)
+    time.sleep(3)
 
 def mudar_aba_frente():
     pyautogui.hotkey("ctrl", "tab")

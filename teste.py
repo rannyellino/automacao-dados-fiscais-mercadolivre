@@ -4,11 +4,13 @@ import time
 import webbrowser
 from tkinter import *
 from selenium import webdriver
+import selenium
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 
 def teste():
@@ -17,9 +19,9 @@ def teste():
     options = Options()
     options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data") #pega perfil do chrome
     chrome = webdriver.Chrome(service=s, options=options)
-    chrome = chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2759098128") #abri navegador na url
+    chrome = chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2780157104") #abri navegador na url
 
-    time.sleep(10)
+    time.sleep(5)
 
     pyautogui.click(x=1272, y=325, clicks=3) # pega título do produto
     copiar() #copia o titulo
@@ -44,26 +46,64 @@ def teste():
     print(mouse)
 
 def teste2():
-    cod_finalizados = []
-    cod_erros = []
-    print(cod_finalizados)
-    print(cod_erros)
-    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
-    nome_arquivo = 'Log ' + str(data_hora) + '.txt'  # Salva a data e hora atual formatada em STRING e adiciona a extensão que quero do arquivo TXT
+    janela = Tk()
+    user = "Rannyel"
+    conta = "1"
+    chrome = abrindo_navegador(user)
+    locations = []
 
-    if(cod_finalizados != []):
-        with open(nome_arquivo,"w") as arquivo:  # Cria o arquivo TXT com o nome certo e começa a escrever em cada linha os códigos que ele finalizou o processo
-            for valor in cod_finalizados:
-                arquivo.write(str(valor)+" FINALIZADO" + "\n")
-    else:
-        print("Não tem códigos finalizados")
+    with open("Loc Elementos.txt", 'r') as arquivo:
+        for linha in arquivo:
+            linha = linha.replace("(","").replace(")","").replace("\n","")
+            print(linha)
+            locations.append(linha)
+    arquivo.close()
 
-    if(cod_erros != []):
-        with open(nome_arquivo, "a") as arquivo:
-            for valor in cod_erros:
-                arquivo.write(str(valor)+" VERIFICAR" + "\n")
-    else:
-        print("Não tem códigos com erros")
+    #locations = dict(locations)
+    print(locations)
+    print(type(locations))
+    time.sleep(2)
+
+
+    um_produto = str(locations[9]).replace(",","\n")
+    um_produto = um_produto.split('\n')
+    firstTime = 0
+    for linha in um_produto:
+        print(linha)
+        if(firstTime == 0):
+            um_produto_loc_x = linha.strip()
+            firstTime = 1
+        um_produto_loc_y = linha.strip()
+    firstTime = 0
+    print('X {}'.format(um_produto_loc_x))
+    print('Y {}'.format(um_produto_loc_y))
+    um_produto_loc_x = int(um_produto_loc_x)
+    um_produto_loc_y = int(um_produto_loc_y)
+
+    pyautogui.click(um_produto_loc_x, um_produto_loc_y)
+
+    time.sleep(5)
+
+    pyautogui.click(locations[0]) #Clica nos valores de X e Y do elemento
+    time.sleep(1)
+    pyautogui.hotkey("ctrl", "a")
+    copiar()
+    sku = janela.clipboard_get()
+    print(sku)
+    time.sleep(1)
+    mouse = pyautogui.position()
+    print(mouse)
+
+def abrindo_navegador(user):
+    # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)
+    s = Service(ChromeDriverManager().install())
+    options = Options() #Para poder pegar o perfil do chrome
+    options.add_argument(r"user-data-dir=C:\Users\{}\AppData\Local\Google\Chrome\User Data".format(user)) #Indicado diretorio do perfil do chrome
+    chrome = webdriver.Chrome(service=s, options=options) #Passando parametros do chrome
+    chrome.maximize_window()
+    chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2780157104") #abri o chrome com o endereço indicado
+    print(chrome)
+    return chrome
 
 def um_segundo():
     time.sleep(1)
@@ -72,5 +112,4 @@ def copiar():
     pyautogui.hotkey("ctrl", "c")
 
 if __name__ == '__main__':
-    teste()
-
+    teste2()

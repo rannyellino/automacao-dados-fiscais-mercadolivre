@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 # 7 = Botão para Salvar
 # 8 = Título do Anúncio
 # 9 = Botão "Possui apenas um produto"
+# 10 = Botão entrar da TRAY
 
 def read_elementos():
     locations = []
@@ -265,3 +266,21 @@ def inicio_fiscais_elementos_location(chrome):
         print(um_produto_loc)
 
     return um_produto_loc
+
+def tray_login_elementos(chrome):
+    login_loc = 0, 0
+
+    #Pega elemento botão ENTRAR e a sua posição na tela
+    try:
+        login = chrome.find_element(By.XPATH, "//button[@id='btn-submit']")
+        panel_height = chrome.execute_script('return window.outerHeight - window.innerHeight;')
+        login_loc_x = login.location['x']
+        login_y = login.location['y']
+        login_loc_y = login_y + panel_height
+        login_loc = login_loc_x, login_loc_y
+        print(login_loc)
+    except NoSuchElementException:
+        print(login_loc)
+
+
+

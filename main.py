@@ -22,7 +22,12 @@ def pegando_valores(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry
     cest = "0107500"
 
     #Começando a preencher os EAN com base nos valores puxados
-    preenchendo_dados_fiscais.preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela, user)
+    if(conta == "1" or conta == "2"):
+        preenchendo_dados_fiscais.preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, ncm, cest, qtd_anuncios, conta, janela, user)
+    elif(conta == "3"):
+        preenchendo_dados_fiscais.preenchendo_tray(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, qtd_anuncios, conta, janela, user)
+    else:
+        exit()
 
 if __name__ == '__main__':
     main()

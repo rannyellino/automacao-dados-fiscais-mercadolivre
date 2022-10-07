@@ -41,7 +41,7 @@ def criando_interface():
     entry_qtd_anuncios.grid(column=0, row=10)
 
     # Selecionar Conta, 1 = ScapJá, 2 = SoEscap
-    texto_conta = Label(janela, text="Qual conta será usada ? 1 = ScapJá, 2 = SoEscap")
+    texto_conta = Label(janela, text="Qual conta será usada ? 1 = ScapJá, 2 = SoEscap e 3 = Tray")
     texto_conta.grid(column=0, row=11)
     entry_conta = Entry(janela, width=20)  # Input para saber quantos anuncios editar
     entry_conta.grid(column=0, row=12)

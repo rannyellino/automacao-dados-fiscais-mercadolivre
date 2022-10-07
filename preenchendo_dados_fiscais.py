@@ -4,6 +4,7 @@ import time
 from tkinter import *
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -345,11 +346,181 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
                 em_processo = False
                 # print("Processo finalizado foi preenchido o EAN de {} anúncios".format(total_anuncios))
 
+def preenchendo_tray(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios, linha_coluna_ean, qtd_anuncios, conta, janela, user):
+    link_tray = r"https://www.scapja.com.br/mvc/adm/panel" #Link para fazer login na TRAY
+    link_produto_tray = r"https://www.scapja.com.br/admin/#/mvc/adm/products/edit/" #Link para entrar na parte de edição da tray
+    iframe = "//html//body//div[1]//div//div[3]//div[1]//div//div//div//iframe[@id='centro']" #Caminho XPATH do iframe que existe dentro da página de produto da TRAY
+    em_processo = True #Variavel para manter o loop
+    primeiro_ciclo = True #Variavel para saber está no primeiro loop
+    cod_finalizados = [] #Lista para colocar os códigos que finalizou o processo
+    cod_erros = [] #Lista para colocar os códigos que deram erro no processo
+    qtd_anuncios = int(qtd_anuncios) #Quantidade de anuncios que serão editados
+
+    #Abrindo navegador CHROME
+    chrome = navegador.abrindo_navegador(user)
+    chrome.maximize_window()
+
+    pausa_longa()
+
+    #Abrindo uma nova aba e entrando na aba de anuncios
+    chrome.execute_script("window.open('about:blank','anuncios');")
+    chrome.switch_to.window("anuncios") #Muda a Aba
+    chrome.get(link_planilha_anuncios)
+    pausa_curta()
+
+    #Abrindo uma nova aba e entrando na aba de EAN
+    chrome.execute_script("window.open('about:blank','eans');")
+    chrome.switch_to.window("eans") #Muda a Aba
+    chrome.get(link_planilha_EAN)
+    pausa_curta()
+
+    # Abrindo uma nova aba e entrando na aba TRAY
+    chrome.execute_script("window.open('about:blank','login_tray');")
+    chrome.switch_to.window("login_tray") #Muda a Aba
+    chrome.get(link_tray)
+    pausa_curta()
+    login_tray(chrome)
+    chrome.close()
+
+    while(em_processo):
+        sku = "" #Codigo sku que será concatenado ao link de produto da tray
+        ean_preenchido = "" #Para fazer a verificação posteriomente para saber se já existe um ean preenchido
+        cod_anuncio_scapja = "" #Para armazenar o código do mesmo anuncios porém na ScapJá dentro do MercadoLivre para no futuro poder pegar o mesmo ean utilizado
+                                #dentro do MercadoLivre
+        link_produto_tray = r"https://www.scapja.com.br/admin/#/mvc/adm/products/edit/"  # Link para entrar na parte de edição da tray
+
+        if(primeiro_ciclo == True):
+            #Procurando a celula certa na planilha de anuncios
+            chrome.switch_to.window("anuncios")
+            pausa_curta()
+            chrome.find_element(By.TAG_NAME, "body").send_keys(Keys.CONTROL + 'J') #Procurar Celula no Google Sheets
+            pyautogui.hotkey('ctrl', 'j')
+            um_segundo()
+            pyautogui.write(linha_coluna_anuncios) #Escreve a Celula
+            pyautogui.hotkey("Enter") #Acha a celula
+            print("Achou a celula de onde começa os anuncios")
+        else:
+            chrome.switch_to.window("anuncios")
+            pausa_curta()
+            pyautogui.hotkey("down")
+            um_segundo()
+            pyautogui.hotkey("down")
+            um_segundo()
+            pyautogui.hotkey("down")
+
+        #Pega o SKU(Código interno do anuncio) para poder preencher os dados fiscais desse anuncio mais pra frente
+        um_segundo()
+        copiar()
+        sku = janela.clipboard_get()
+        sku = str(sku) #Transforma o que foi copiado em uma STRING
+        print(sku)
+        link_produto_tray = link_produto_tray+sku #Deixa o link pronto pra entrar no anuncio e edita-lo dentro da TRAY
+        print(link_produto_tray)
+
+        # Abrindo uma nova aba e entrando na aba TRAY
+        chrome.execute_script("window.open('about:blank','produto_tray');")
+        chrome.switch_to.window("produto_tray")  # Muda a Aba
+        chrome.get(link_produto_tray)
+        pausa_longa()
+
+        #Antes de checar os valores para editar é preciso entrar dentro do iframe do HTML da página
+        chrome.switch_to.frame(chrome.find_element(By.XPATH, iframe))
+        pausa_curta()
+
+        #Checando se existe valor no campo EAN
+        ean_element = chrome.find_element(By.XPATH, "//input[@id='ProductEan']")
+        ean_preenchido = ean_element.get_attribute('value')
+        ean_preenchido = str(ean_preenchido)
+        um_segundo()
+        print("Ean Preenchido: {}".format(ean_preenchido))
+        #Checa se o campo tem algum valor, se não tiver vai começar a preencher
+        if(ean_preenchido == ""):
+            chrome.switch_to.window("anuncios")
+            um_segundo()
+            pyautogui.hotkey("up")
+            um_segundo()
+            pyautogui.hotkey("up")
+            copiar()
+            cod_anuncio_scapja = janela.clipboard_get() #Guarda o código do anuncio da scapja referente a este SKU
+            um_segundo()
+            pyautogui.hotkey("down")
+            um_segundo()
+            pyautogui.hotkey("down")
+
+            #Vai ate a aba de EANS e procura o código da ScapJá para saber qual código de EAN usar dentro da TRAY
+            chrome.switch_to.window("eans")
+            pausa_curta()
+            chrome.find_element(By.TAG_NAME, "body").send_keys(Keys.CONTROL + 'f')  # Procurar Celula no Google Sheets
+            pyautogui.hotkey('ctrl', 'f') #Abri a janela de procura
+            um_segundo()
+            pyautogui.write(cod_anuncio_scapja) #Escreve o código da ScapJá
+            um_segundo()
+            pyautogui.hotkey('enter') #Acha o código na planilha
+            pyautogui.hotkey('esc') #Fecha a janela de procura
+
+            #Agora basta copiar o ean que foi utilizado também na scapjá e usar o mesmo dentro da TRAY
+            pyautogui.hotkey('left')
+            copiar() #Copia o codigo EAN
+            pyautogui.hotkey('right')
+            ean = janela.clipboard_get()
+            ean = str(ean) #Guarda o ean em uma variavel e o transforma em STRING
+            um_segundo()
+
+            #Novamanete tem que entrar na aba do produto da tray e depois de entrar precisa ir dentro do iframe e localizar
+            #O elemento novamente para poder edita-lo
+            chrome.switch_to.window("produto_tray")
+            pausa_curta()
+            chrome.switch_to.frame(chrome.find_element(By.XPATH, iframe))
+            um_segundo()
+            ean_element = chrome.find_element(By.XPATH, "//input[@id='ProductEan']")
+            ean_element.send_keys(ean) #Cola o código EAN que copiou no campo de ean da TRAY
+            um_segundo()
+            pyautogui.scroll(-1000) #Faz um scroll para baixo
+
+            #Apos ter colado o EAN no campo certo basta clicar no botão SALVAR
+            chrome.find_element(By.XPATH, "//input[@id='addSaveAndListBtn']").click()
+            pausa_curta()
+            chrome.close() #Fecha a aba do produto_tray para poder abri-la novamente no proximo ciclo
+
+            #Agora iremos indicar na planilha de anuncios e de ean que fizemos o processo
+            chrome.switch_to.window("anuncios")
+            pausa_curta()
+            pyautogui.hotkey("right")
+            pyautogui.write("FEITO")
+            um_segundo()
+            pyautogui.hotkey("left")
+
+            chrome.switch_to.window("eans")
+            pausa_curta()
+            pyautogui.hotkey("right")
+            pyautogui.write(sku)
+            pyautogui.hotkey("enter") #Para confirmar o que escreveu no Google Sheets
+            um_segundo()
+
+            qtd_anuncios = qtd_anuncios - 1
+            print("Qtd Anuncios {}".format(qtd_anuncios))
+            primeiro_ciclo = False
+            cod_finalizados.append(sku)
+        else:
+            primeiro_ciclo = False
+            qtd_anuncios = qtd_anuncios - 1
+            print("Qtd Anuncios {}".format(qtd_anuncios))
+            cod_erros.append(sku)
+
+        if(qtd_anuncios == 0):
+            finalizado = Label(janela, text="Processo Finalizado!!!")
+            finalizado.grid(column=0, row=17)
+            log.criando_log(cod_finalizados, cod_erros)
+            em_processo = False
+
 def um_segundo():
     time.sleep(1)
 
 def pausa_longa():
     time.sleep(6.5)
+
+def pausa_10():
+    time.sleep(10)
 
 def pausa_curta():
     time.sleep(3)
@@ -368,5 +539,12 @@ def colar_link():
 
 def copiar():
     pyautogui.hotkey("ctrl", "c")
+
+def login_tray(chrome):
+    #Acha o botão de login e clica nele
+    try:
+        login = chrome.find_element(By.XPATH, "//button[@id='btn-submit']").click()  # Acha elemento
+    except NoSuchElementException:
+        print("Não tem botão de login")
 
 

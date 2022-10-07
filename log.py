@@ -14,14 +14,17 @@ def criando_log(cod_finalizados, cod_erros):
             for valor in cod_erros:
                 arquivo.write(str(valor)+" VERIFICAR" + "\n")
 
-def log_elementos(locations, loc_um_produto):
+def log_elementos(locations, loc_um_produto, loc_login_tray):
     nome_arquivo = 'Loc Elementos'+'.txt' #Colocando o nome do arquivo
     with open(nome_arquivo, 'w') as arquivo:
         for loc in locations:
-            print(loc)
             arquivo.write(str(loc))
             arquivo.write('\n')
 
     with open(nome_arquivo, 'a') as arquivo:
         arquivo.write(str(loc_um_produto))
+        arquivo.write('\n')
+
+    with open(nome_arquivo, 'a') as arquivo:
+        arquivo.write(str(loc_login_tray))
         arquivo.write('\n')

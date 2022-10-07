@@ -11,39 +11,33 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 
 def teste():
     janela = Tk()
-    s = Service(ChromeDriverManager().install()) #instala o drive do chrome que precisa
-    options = Options()
-    options.add_argument(r"user-data-dir=C:\Users\Rannyel\AppData\Local\Google\Chrome\User Data") #pega perfil do chrome
-    chrome = webdriver.Chrome(service=s, options=options)
-    chrome = chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2780157104") #abri navegador na url
-
-    time.sleep(5)
-
-    pyautogui.click(x=1272, y=325, clicks=3) # pega título do produto
-    copiar() #copia o titulo
-    titulo = janela.clipboard_get() #coloca a copia do titulo dentro de uma variavel
-
-    titulo_pronto = titulo.casefold() #transforma toda string em minusculo
-    print(titulo_pronto)
-    titulo_split = titulo_pronto.rsplit(" ") #separa a string dentro de uma lista separando cada valor entre um espaço " "
-    print(titulo_split)
-    print(type(titulo_split))
-
-    #Checa se algumas das palavras contem a palavra catalisador para saber se precisa trocar os valores fiscais
-    for texto in titulo_split:
-        if(texto == "catalisador"):
-            print(texto)
-            print("É catalisador")
-        else:
-            print(texto)
-            print("não é catalisador")
-
-    mouse = pyautogui.position()
-    print(mouse)
+    user = "Rannyel"
+    chrome = abrindo_navegador(user)
+    chrome.maximize_window()
+    time.sleep(10)
+    pyautogui.scroll(-1000)
+    try:
+        #print(chrome.page_source)
+        time.sleep(10)
+        chrome.switch_to.frame(chrome.find_element(By.XPATH, "//html//body//div[1]//div//div[3]//div[1]//div//div[2]//div//iframe[@id='centro']"))
+        print("Entrou no iframe")
+        time.sleep(2)
+        ean_element = chrome.find_element(By.XPATH, "//input[@id='ProductEan']")
+        ean_preenchido = ean_element.get_attribute('value')
+        ean_preenchido = str(ean_preenchido)
+        time.sleep(2)
+        print("Meu EAN: {}".format(ean_preenchido))
+        print("Achou EAN")
+    except TimeoutException:
+        print("Não achou o EAN")
+    time.sleep(2)
 
 def teste2():
     janela = Tk()
@@ -101,7 +95,7 @@ def abrindo_navegador(user):
     options.add_argument(r"user-data-dir=C:\Users\{}\AppData\Local\Google\Chrome\User Data".format(user)) #Indicado diretorio do perfil do chrome
     chrome = webdriver.Chrome(service=s, options=options) #Passando parametros do chrome
     chrome.maximize_window()
-    chrome.get("https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB2780157104") #abri o chrome com o endereço indicado
+    chrome.get("https://www.scapja.com.br/admin/#/mvc/adm/products/edit/3") #abri o chrome com o endereço indicado
     print(chrome)
     return chrome
 
@@ -112,4 +106,4 @@ def copiar():
     pyautogui.hotkey("ctrl", "c")
 
 if __name__ == '__main__':
-    teste2()
+    teste()

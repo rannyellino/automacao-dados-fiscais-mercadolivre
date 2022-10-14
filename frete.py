@@ -20,8 +20,8 @@ def preechendo_tabela_frete(link_planilha_anuncios, linha_coluna_anuncios, user,
     qtd_anuncios = int(qtd_anuncios) #Qunatidade de anuncios que serão editados
     anuncio = r"https://www.mercadolivre.com.br/anuncios/MLB" #link para entrar no anuncio para modificar
     plus_anuncio = r"/modificar/" #string para concatenar com o link para ir para a area de edição do anuncio
-    estado_xpath = "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[2]//div//ul//li[{}]//div//label[1]//div[1]//input" #Xpath de elemento da tabela de frete que vai o estado
-    valor_xpath = "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[2]//div//ul//li[{}]//div//label[2]//div[1]//input" #Xpath de elemento da tabela de frete que vai o valor
+    estado_xpath = "//*[@id='shipping_task']//div[2]//div[1]//div//div//div[2]//div//div[2]//div[2]//div//ul//li[{}]//div//label[1]//div[1]//input" #Xpath de elemento da tabela de frete que vai o estado
+    valor_xpath = "//*[@id='shipping_task']//div[2]//div[1]//div//div//div[2]//div//div[2]//div[2]//div//ul//li[{}]//div//label[2]//div[1]//input" #Xpath de elemento da tabela de frete que vai o valor
 
     chrome = navegador.abrindo_navegador(user) #abri navegador
     chrome.maximize_window()
@@ -74,11 +74,11 @@ def preechendo_tabela_frete(link_planilha_anuncios, linha_coluna_anuncios, user,
             chrome.find_element(By.XPATH, "//*[@id='shipping_header_container']//div//div[1]//h2").click() #Faz o primeiro clique em 'Forma de entrega'
             print("Clicou pela 1x")
             um_segundo()
-            element2 = chrome.find_element(By.XPATH, "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[1]//label//span[1]") #Apenas acha o elemento para clicar depois
+            element2 = chrome.find_element(By.XPATH, "//*[@id='shipping_task']//div[2]//div[1]//div//div//div[1]//label//input") #Apenas acha o elemento para clicar depois
             um_segundo()
             chrome.execute_script("arguments[0].click();", element2) #Faz o segundo clique em 'Faço envio por minha conta'
             print("Clicou pela 2x")
-            element3 = chrome.find_element(By.XPATH, "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[1]//label//span") #Apenas acha o elemento para clicar depois
+            element3 = chrome.find_element(By.XPATH, "//*[@id='shipping_task']//div[2]//div[1]//div//div//div[2]//div//div[2]//div[1]//label//span") #Apenas acha o elemento para clicar depois
             um_segundo()
             chrome.execute_script("arguments[0].click();", element3) #Faz o terceiro clique em 'Por conta do comprador'
             print("Clicou pela 3x")
@@ -87,7 +87,7 @@ def preechendo_tabela_frete(link_planilha_anuncios, linha_coluna_anuncios, user,
 
             #Abaixo vai existir um for para adicionar a quantidade de faixas de frete que queremos na tabela
             for x in range(10):
-                adicionar = chrome.find_element(By.XPATH, "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[2]//div//a")
+                adicionar = chrome.find_element(By.XPATH, "//*[@id='shipping_task']//div[2]//div[1]//div//div//div[2]//div//div[2]//div[2]//div//a")
                 chrome.execute_script("arguments[0].click();", adicionar) #Clica para adicionar mais uma faixa de frete
                 um_segundo()
             while i < 26:

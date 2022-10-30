@@ -56,6 +56,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
     while (em_processo):
         checa_catalisador = 0 #Variavel dedicada para o sistema de verificação se contém catalisador no anuncio ou não
                               #Sempre ela vai iniciar com o valor de 0 em cada ciclo
+        checa_oleo = 0 #Variavel dedicada para o sistema de verificação se contém oleo no anuncio ou não
 
         if(primeiroCiclo):
             # Volta para a aba dos anúncios
@@ -214,8 +215,11 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
                 if (texto == "catalisador"):
                     checa_catalisador = 1
                     print("É catalisador")
+                elif (texto == "oleo" or texto == "óleo"):
+                    checa_oleo = 1
+                    print("É oleo")
                 else:
-                    print("não é catalisador")
+                    print("não é catalisador nem oleo")
 
 
             #Indo até o campo nome do produto e colando
@@ -225,10 +229,15 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
 
             #Preenchendo Outros Dados
             pyautogui.hotkey("Tab")
-            if(checa_catalisador == 0):
-                ncm = "87089200"
-            else:
+            if(checa_catalisador == 1):
                 ncm = "84213200"
+                cest = "0107500"
+            elif(checa_oleo == 1):
+                ncm = "27101932"
+                cest = "0600700"
+            else:
+                ncm = "87089200"
+                cest = "0107500"
             pyautogui.write(ncm) #Preenchendo NCM
             pausa_curta()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")

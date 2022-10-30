@@ -2,6 +2,7 @@
 import interface
 import preenchendo_dados_fiscais
 import frete
+import calc
 
 def main():
     #Criando interface
@@ -42,6 +43,22 @@ def pegando_valores_frete(entry_link_planilha_anuncios, entry_linha_coluna_anunc
         frete.preechendo_tabela_frete(link_planilha_anuncios, linha_coluna_anuncios, user, qtd_anuncios, janela)
     else:
         print("Não possui todos os valores preenchidos")
+
+def pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2, entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4, entry_qtd_5, entry_cod_5):
+    #Pegando os valores colocado na interface
+    qtd_1 = entry_qtd_1.get()
+    qtd_2 = entry_qtd_2.get()
+    qtd_3 = entry_qtd_3.get()
+    qtd_4 = entry_qtd_4.get()
+    qtd_5 = entry_qtd_5.get()
+    cod_1 = entry_cod_1.get()
+    cod_2 = entry_cod_2.get()
+    cod_3 = entry_cod_3.get()
+    cod_4 = entry_cod_4.get()
+    cod_5 = entry_cod_5.get()
+    janela = janela #Janela da interface e suas propriedades e elementos
+
+    calc.calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, cod_5)
 
 if __name__ == '__main__':
     main()

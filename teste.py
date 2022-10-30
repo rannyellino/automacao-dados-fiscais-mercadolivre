@@ -4,6 +4,8 @@ import time
 import webbrowser
 from tkinter import *
 from selenium import webdriver
+import pandas as pd
+import openpyxl
 import selenium
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -75,13 +77,17 @@ def teste():
         print("Não achou o ELEMENTO")
 
 def teste2():
-    tabela = ["SÃO PAULO", "47,00", "SANTA CATARINA", "56,90", "PARANA", "56,90", "DISTRITO FEDERAL", "67,90",
-              "MINAS GERAIS", "67,90", "RIO DE JANEIRO", "67,90", "ESPIRITO SANTO", "67,90", "RIO GRANDE DO SUL",
-              "67,90", "MATO GROSSO DO SUL",
-              "82,90", "PE - BA - SE", "93,00", "CE - GO - MT - RN - PB - AL", "105,90", "MA - PI", "115,00",
-              "DEMAIS ESTADOS FAZER COTAÇÃO NAS PERGUNTAS", "R$999,99"]  # TABELA DE FRETE PARA ADICIONAR NOS ANUNCIOS
-    tamanho = tabela.__len__()
-    print(tamanho)
+    df_base = pd.read_excel('Peças-Preços.xlsx')
+    print(df_base)
+
+    df_base = pd.read_excel('Peças-Preços.xlsx')
+    print(df_base)
+
+    filtro = df_base.loc[df_base["Cod Peça"] == "13033"]  # Procura a linha com o código da peça
+    print("Filtro {}".format(filtro))
+    lista = list(filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
+    print("Lista {}".format(lista))
+
 
 def abrindo_navegador(user):
     # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)
@@ -101,4 +107,4 @@ def copiar():
     pyautogui.hotkey("ctrl", "c")
 
 if __name__ == '__main__':
-    teste()
+    teste2()

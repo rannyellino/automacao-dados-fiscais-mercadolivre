@@ -29,6 +29,12 @@ def main_interface():
     espaco = Label(janela, text="")
     espaco.grid(column=0, row=5)  # Apenas dar espaço na interface
 
+    botao_calc = Button(janela, text="Calculadora", command=lambda: interface_calc())
+    botao_calc.grid(column=0, row=6)
+
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=7)  # Apenas dar espaço na interface
+
     janela.mainloop()  # Deixando a janela aberta
 
 
@@ -124,3 +130,55 @@ def interface_frete():
     botao_start = Button(janela, text="Começar Processo", command=lambda: main.pegando_valores_frete(entry_link_planilha_anuncios, entry_linha_coluna_anuncios, entry_user, entry_qtd_anuncios, janela))
     botao_start.grid(column=0, row=9)
     janela.mainloop()  # Deixando a janela aberta
+
+def interface_calc():
+    # Criando interface
+    janela = Tk()  # Criando Janela
+    janela.title("Robo Brunão - Automatização E-COMMERCE")  # Alterando o título da Janela
+
+    texto_orientacao = Label(janela,
+                             text="Atualmente a calculadora está apenas com a base de dados da Mastra e Pioneiro,\n"
+                                  "para calcular basta inserir o código das peças nos campos a baixo e a quantidade de cada peça")  # Criando um texto
+    texto_orientacao.grid(column=0, row=0, columnspan=26)  # Indicando posição do texto
+
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=1)  # Apenas dar espaço na interface
+
+    entry_qtd_1 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_1.grid(column=13, row=2, sticky=W)
+    entry_qtd_1.insert(0, "1")
+    entry_cod_1 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_1.grid(column=14, row=2, sticky=W)
+
+    entry_qtd_2 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_2.grid(column=13, row=3, sticky=W)
+    entry_qtd_2.insert(0, "1")
+    entry_cod_2 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_2.grid(column=14, row=3, sticky=W)
+
+    entry_qtd_3 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_3.grid(column=13, row=4, sticky=W)
+    entry_qtd_3.insert(0, "1")
+    entry_cod_3 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_3.grid(column=14, row=4, sticky=W)
+
+    entry_qtd_4 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_4.grid(column=13, row=5, sticky=W)
+    entry_qtd_4.insert(0, "1")
+    entry_cod_4 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_4.grid(column=14, row=5, sticky=W)
+
+    entry_qtd_5 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_5.grid(column=13, row=6, sticky=W)
+    entry_qtd_5.insert(0, "1")
+    entry_cod_5 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_5.grid(column=14, row=6, sticky=W)
+
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=7)  # Apenas dar espaço na interface
+
+    botao_start = Button(janela, text="Calcular",command=lambda: main.pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2,
+                                                                                           entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4,
+                                                                                           entry_qtd_5, entry_cod_5))
+    botao_start.grid(column=13, row=8, columnspan=2, sticky=W)
+

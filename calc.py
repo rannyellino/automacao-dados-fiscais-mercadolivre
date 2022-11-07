@@ -51,14 +51,15 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
 
                 #Verifica se tem valor na lista, se não tiver é porque não encontrou o código na planilha
                 if(lista != []):
-                    #0 = Fabricante, 1 = Linha, 2 = Código da Peça, 3 = Preço
+                    #0 = Fabricante, 1 = Linha, 2 = Código da Peça, 3 = Preço, 4 = Tipo de Peça(Escap, Fix, Catalisador)
                     fab = lista[0]
                     linha = lista[1]
                     cod = lista[2]
                     preco = lista[3]
+                    tipo = lista[4]
 
                     #Encontrando o indice da fabrica
-                    indice = indice_fabricante(fab, linha)
+                    indice = indice_fabricante(fab, linha, tipo)
 
                     #Calculado quantidade de itens x o preço x o indice para ter assim o valor de custo
                     print(qtd_i)
@@ -78,11 +79,12 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
                         venda_soescap = custo * 2.04
                         valores_vendas.append(venda_soescap)
                     elif(linha == "Fix"):
-                        venda_scapja = custo
-                        valores_vendas.append(venda_scapja)
-                        venda_soescap = custo
-                        valores_vendas.append(venda_soescap)
-
+                        if(custo > 50):
+                            custo = custo * 0.7
+                            venda_scapja = custo
+                            valores_vendas.append(venda_scapja)
+                            venda_soescap = custo
+                            valores_vendas.append(venda_soescap)
                     i_for = i_for+1
                     qtd_i = qtd_i+1
                 else:
@@ -111,16 +113,18 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
         valores_venda_label = Label(janela, text=string_venda)
         valores_venda_label.grid(column=0, row=9, columnspan=26)
 
-def indice_fabricante(fab, linha):
+def indice_fabricante(fab, linha, tipo):
     fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix"]
 
     #Atribuindo cada indice para cada fabricante
 
     #Mastra
-    if(fab == fabricantes[0] and linha == "Leve"):
+    if(fab == fabricantes[0] and linha == "Leve" and tipo == "Escap"):
         indice = 0.449
-    elif(fab == fabricantes[0] and linha == "Pesada"):
+    elif(fab == fabricantes[0] and linha == "Pesada" and tipo == "Escap"):
         indice = 0.5466
+    elif(fab == fabricantes[0] and linha == "Leve" and tipo == "Catalisador"):
+        indice = 0.4413
 
     #Pioneiro
     if (fab == fabricantes[1]):

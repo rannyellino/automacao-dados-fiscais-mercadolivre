@@ -85,6 +85,11 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
                             valores_vendas.append(venda_scapja)
                             venda_soescap = custo
                             valores_vendas.append(venda_soescap)
+                        else:
+                            venda_scapja = custo
+                            valores_vendas.append(venda_scapja)
+                            venda_soescap = custo
+                            valores_vendas.append(venda_soescap)
                     i_for = i_for+1
                     qtd_i = qtd_i+1
                 else:

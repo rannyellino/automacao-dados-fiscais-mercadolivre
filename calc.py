@@ -67,19 +67,17 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
                     custo = qtd*preco*indice
                     print("Valor de Preço*Indice {}".format(custo))
 
+                    #Chama função para definir as margens e checar regra de custo
+                    custo, margem_scapja, margem_soescap = margem(custo, fab, linha)
+
                     #Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
-                    if(linha == "Leve"):
-                        venda_scapja = custo * 1.75
+                    if(linha == "Leve" or linha == "Pesada"):
+                        venda_scapja = custo * margem_scapja
                         valores_vendas.append(venda_scapja)
-                        venda_soescap = custo * 1.65
-                        valores_vendas.append(venda_soescap)
-                    elif(linha == "Pesada"):
-                        venda_scapja = custo * 2.15
-                        valores_vendas.append(venda_scapja)
-                        venda_soescap = custo * 2.04
+                        venda_soescap = custo * margem_soescap
                         valores_vendas.append(venda_soescap)
                     elif(linha == "Fix"):
-                        if(custo > 50):
+                        if(custo > 50 and qtd < 2):
                             custo = custo * 0.7
                             venda_scapja = custo
                             valores_vendas.append(venda_scapja)
@@ -108,6 +106,8 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
         venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6])
         venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7])
         venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + 3
+
+        print("Imprimir valores")
 
         #Colocando os valores de venda na interface
         string_venda = "Valor de venda na ScapJá: {}\n" \
@@ -140,5 +140,28 @@ def indice_fabricante(fab, linha, tipo):
         indice = 1
 
     return indice
+
+def margem(custo, fab, linha):
+    #Função para definir margem e também definir as regras para quando tivermos que usar o custo dele mesmo vezes 2
+    #Quando o custo de uma peça é inferior ou igual a R$65,00 ele precisa ser calculado X2 ignorando a margem normal de 175% e 165%
+
+    if(fab == "Mastra" and linha == "Leve" and custo <= 65):
+        custo = custo * 2
+        margem_scapja = 1
+        margem_soescap = 1
+    elif(fab == "Pioneiro" and linha == "Leve" and custo <= 65):
+        custo = custo * 2
+        margem_scapja = 1
+        margem_soescap = 1
+    elif(fab == "Mastra" and linha == "Pesada"):
+        margem_scapja = 2.15
+        margem_soescap = 2.04
+    else:
+        margem_scapja = 1.75
+        margem_soescap = 1.65
+
+    return custo, margem_scapja, margem_soescap
+
+
 
 

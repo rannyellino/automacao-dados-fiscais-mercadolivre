@@ -97,15 +97,18 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
 
     if(i_for == cods.__len__()):
         print(valores_vendas)
-        if(valores_vendas.__len__() < 7):
+        if(valores_vendas.__len__() < 9):
             for i in range(7):
                 valores_vendas.append(0)
 
 
         #Soma os valores de cada peça pra ter o valor de venda final
-        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6])
-        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7])
-        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + 3
+        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8])
+        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9])
+        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + 3
+        print("Valor de Venda ScapJá: {}".format(venda_scapja))
+        print("Valor de Venda SoEscap: {}".format(venda_soescap))
+        print("Valor de Venda Tray: {}".format(venda_tray))
 
         print("Imprimir valores")
 

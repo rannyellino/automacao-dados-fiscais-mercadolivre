@@ -98,7 +98,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
     if(i_for == cods.__len__()):
         print(valores_vendas)
         if(valores_vendas.__len__() < 9):
-            for i in range(7):
+            for i in range(9):
                 valores_vendas.append(0)
 
 
@@ -164,7 +164,3 @@ def margem(custo, fab, linha):
         margem_soescap = 1.65
 
     return custo, margem_scapja, margem_soescap
-
-
-
-

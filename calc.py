@@ -32,16 +32,11 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
     df_base = pd.read_excel('Peças-Preços.xlsx')
     print(df_base)
 
-    filtro = df_base.loc[df_base["Cod Peça"] == cods[0]]  # Procura a linha com o código da peça
-    print(filtro)
-    lista = list(filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
-    print(lista)
-
     while(i_for < cods.__len__()):
         for i in cods:
             if(i != "" or i != None): #Checa se há algum valor no código da peça
                 print("Entrou no if dentro do for")
-                filtro = df_base.loc[df_base["Cod Peça"] == i.upper()] #Procura a linha com o código da peça
+                filtro = df_base.loc[df_base["Cod Peça"] == i.upper().strip()] #Procura a linha com o código da peça
                 lista = list(filtro.values.flatten()) #Transforma a linha da planilha em uma lista para termos os valores
 
                 #Caso a lista continue em branco é porque não achou a peça na planilha, um dos motivos pode ser a pesquisa em STR sendo que tem que ser em INT

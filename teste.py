@@ -20,61 +20,76 @@ from datetime import datetime
 
 def teste():
     janela = Tk()
-    tabela = ["SÃO PAULO", "47,00", "SANTA CATARINA", "56,90", "PARANA", "56,90", "DISTRITO FEDERAL", "67,90",
-              "MINAS GERAIS", "67,90", "RIO DE JANEIRO", "67,90", "ESPIRITO SANTO", "67,90", "RIO GRANDE DO SUL", "67,90", "MATO GROSSO DO SUL",
-              "82,90", "PE - BA - SE","93,00", "CE - GO - MT - RN - PB - AL", "105,90", "MA - PI", "115,00",
-              "DEMAIS ESTADOS FAZER COTAÇÃO NAS PERGUNTAS","R$999,99"]  # TABELA DE FRETE PARA ADICIONAR NOS ANUNCIOS
-    user = "Rannyel"
-    chrome = abrindo_navegador(user)
-    chrome.maximize_window()
-    estado_xpath = "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[2]//div//ul//li[{}]//div//label[1]//div[1]//input"
-    valor_xpath = "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[2]//div//ul//li[{}]//div//label[2]//div[1]//input"
-    i_estado = 1
-    i_valor = 1
-    time.sleep(5)
 
-    # Agora iremos começar a preencher de fato a tabela de frete, mas antes precisamos fazer alguns clicks em alguns elementos do HTML para poder ter a tabela
-    try:
-        chrome.find_element(By.XPATH,
-                            "//*[@id='shipping_header_container']//div//div[1]//h2").click()  # Faz o primeiro clique em 'Forma de entrega'
-        print("Clicou pela 1x")
-        um_segundo()
-        element2 = chrome.find_element(By.XPATH,
-                                       "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[1]//label//span[1]")  # Apenas acha o elemento para clicar depois
-        um_segundo()
-        chrome.execute_script("arguments[0].click();", element2)  # Faz o segundo clique em 'Faço envio por minha conta'
-        print("Clicou pela 2x")
-        element3 = chrome.find_element(By.XPATH,
-                                       "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[1]//label//span")  # Apenas acha o elemento para clicar depois
-        um_segundo()
-        chrome.execute_script("arguments[0].click();", element3)  # Faz o terceiro clique em 'Por conta do comprador'
-        print("Clicou pela 3x")
-        # AGORA FALTA ADICIONAR TODOS OS CAMPOS NECESSARIOS E PREENCHE-LOS
-        for i in range(10):
-            adicionar = chrome.find_element(By.XPATH,
-                                            "//*[@id='shipping_task']//div[2]//div[1]//div//div[2]//div[2]//div//div[2]//div[2]//div//a")
-            chrome.execute_script("arguments[0].click();", adicionar)
-            um_segundo()
-        i = 0  # Esse servira como indice tanto pro nosso laço quanto pra saber qual valor da tabela ele tem que pegar e colocar nos campos do frete
-        while i < 26:
-            estado = chrome.find_element(By.XPATH, estado_xpath.format(
-                i_estado))  # pega o elemento que será o estado na tabela de frete
-            estado.send_keys(tabela[i])  # coloca o valor correto do estado nesse campo
-            i = i + 1  # adiciona mais 1 no indice para saber que agora terá que usar o proximo valor da nossa lista 'tabela'
-            um_segundo()
-            valor = chrome.find_element(By.XPATH, valor_xpath.format(
-                i_valor))  # pega o elemento que será o valor de custo na tabela de frete
-            valor.send_keys(tabela[i])  # coloca o valor correto  nesse campo
-            i = i + 1  # adiciona mais 1 no indice para saber que agora terá que usar o proximo valor da nossa lista 'tabela'
-            i_estado = i_estado + 1  # Faz soma pra ir pro proximo 'li' do html
-            i_valor = i_valor + 1  # Faz soma pra ir pro proximo 'li' do html
-        i_estado = 1  # Será usado para saber qual é o 'li' que estamos usando na lista/tabela de html do frete
-        i_valor = 1  # Será usado para saber qual é o 'li' que estamos usando na lista/tabela de html do frete
-        um_segundo()
-        print("Finalizou de preencher")
-        time.sleep(5)
-    except NoSuchElementException:
-        print("Não achou o ELEMENTO")
+    #Lendo a tabela
+    df_base = pd.read_excel('DESC_TESTE.xlsx')
+    print(df_base)
+
+    #Guardando os valores de uma linha dentro de uma variavel
+    linha = df_base.loc[[1]]
+    print(linha)
+    lista = list(linha.values.flatten())
+    print(lista)
+
+    #LISTA
+    #0 = CONTA, 1 = Código do Anúncio, 4 = Descrição, 7 = Preço de Venda
+    conta = str(lista[0])
+    cod = str(lista[1])
+    desc = str(lista[4])
+    preco = int(lista[7])
+
+    #PROCURANDO CÓDIGO DAS PEÇAS
+    variation_cod = 0 # 1 = "Código:", 2 = "Códigos"
+
+    #Vai tentar achar a posição da palavra "Código:" se não achar vai tentar procurar a palavra "Códigos:", pois são os dois padrões que usamos
+    find_cod = desc.find("Código:")
+    variation_cod = 1
+    if(find_cod == None or find_cod == -1):
+        find_cod = desc.find("Códigos:")
+        variation_cod = 2
+
+    #Transforma em int para poder funcionar no método de exclusão de string atraves de index
+    find_cod = int(find_cod)
+
+    #Aqui adiciona mais index de acordo com a palavra achada se foi no singular ou no plural a palavra Código
+    if(find_cod != None and variation_cod == 1):
+        find_cod = find_cod + 5
+    elif(find_cod != None and variation_cod == 2):
+        find_cod = find_cod + 6
+    print("Find Cod:", find_cod)
+
+    #Vamos limpar agora a string da descrição do anúncio para ter apenas os códigos das peças
+    if len(desc) > find_cod:
+        codigos = desc[0: 0:] + desc[find_cod + 1::]
+        codigos_len = len(codigos)
+        codigos_len = int(codigos_len)
+
+    print("Códigos:", codigos)
+    print("Len Tamanho:", codigos_len)
+
+    #Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
+    find_last = codigos.find("Para")
+    if (find_last == None or find_last == -1):
+        find_last = codigos.find("Linha")
+
+    find_last = int(find_last)
+    print("Find Last:", find_last)
+
+    #Aqui começa a exclusão de caracteres da string baseado na posição dos caracteres
+    if len(codigos) > find_last:
+        codigos = codigos[0: find_last:] + codigos[codigos_len + 1::]
+
+    print("Códigos:", codigos)
+
+    #Continua eliminando caracteres a mais que não sejam códigos
+    codigos = codigos.replace(":", "")
+    codigos = codigos.replace("(Brinde)", "")
+    codigos = codigos.replace(" ", "")
+    codigos = codigos.replace("+", ",")
+    lista_codigos = codigos.split(",")
+
+    print("Lista Códigos", lista_codigos)
+    print(type(lista_codigos))
 
 def teste2():
     df_base = pd.read_excel('Peças-Preços.xlsx')
@@ -107,4 +122,4 @@ def copiar():
     pyautogui.hotkey("ctrl", "c")
 
 if __name__ == '__main__':
-    teste2()
+    teste()

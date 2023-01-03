@@ -1,114 +1,183 @@
 from tkinter import *
 import pandas as pd
 import openpyxl
+import calc
+import log
+
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('DESC_TESTE.xlsx')
+    df_base = pd.read_excel('DESC_TESTE2.xlsx')
     print(df_base)
+    rows = len(df_base.index)
+    i = 0
+    contas = []
+    mlbs = []
+    precos_antigos = []
+    precos_corretos = []
+    dif = []
+    status = []
 
-    #Guardando os valores de uma linha dentro de uma variavel
-    linha = df_base.loc[[0]]
-    print(linha)
-    lista = list(linha.values.flatten()) #Transforma toda a linha do excel em uma ARRAY
-    print(lista)
+    #Criando um for para passar por cada linha da planilha de base de dados
+    while i < rows:
+        dif_ = None
+        status_ = None
 
-    #LISTA
-    #0 = CONTA, 1 = Código do Anúncio, 4 = Descrição, 7 = Preço de Venda
-    conta = str(lista[0])
-    cod = str(lista[1])
-    desc = str(lista[4])
-    preco = int(lista[7])
+        #Guardando os valores de uma linha dentro de uma variavel
+        linha = df_base.loc[[i]]
+        print(linha)
+        lista = list(linha.values.flatten()) #Transforma toda a linha do excel em uma ARRAY
+        print(lista)
 
-    #PROCURANDO CÓDIGO DAS PEÇAS
-    variation_cod = 0 # 1 = "Código:", 2 = "Códigos"
+        #LISTA
+        #0 = CONTA, 1 = Código do Anúncio, 4 = Descrição, 7 = Preço de Venda e 10 = Frete
+        conta = str(lista[0])
+        cod = str(lista[1])
+        desc = str(lista[4])
+        preco = int(lista[7])
+        #frete = int(lista[10])
+        frete = 35
 
-    #Vai tentar achar a posição da palavra "Código:" se não achar vai tentar procurar a palavra "Códigos:", pois são os dois padrões que usamos
-    find_cod = desc.find("Código:")
-    variation_cod = 1
-    if(find_cod == None or find_cod == -1):
-        find_cod = desc.find("Códigos:")
-        variation_cod = 2
+        #PROCURANDO CÓDIGO DAS PEÇAS
+        variation_cod = 0 # 1 = "Código:", 2 = "Códigos"
 
-    #Transforma em int para poder funcionar no método de exclusão de string atraves de index
-    find_cod = int(find_cod)
+        #Vai tentar achar a posição da palavra "Código:" se não achar vai tentar procurar a palavra "Códigos:", pois são os dois padrões que usamos
+        find_cod = desc.find("Código:")
+        variation_cod = 1
+        if(find_cod == None or find_cod == -1):
+            find_cod = desc.find("Códigos:")
+            variation_cod = 2
 
-    #Aqui adiciona mais index de acordo com a palavra achada se foi no singular ou no plural a palavra Código
-    if(find_cod != None and variation_cod == 1):
-        find_cod = find_cod + 5
-    elif(find_cod != None and variation_cod == 2):
-        find_cod = find_cod + 6
-    print("Find Cod:", find_cod)
+        #Transforma em int para poder funcionar no método de exclusão de string atraves de index
+        find_cod = int(find_cod)
 
-    #Vamos começar a limpar agora a string da descrição do anúncio para ter apenas os códigos das peças
-    if len(desc) > find_cod:
-        codigos = desc[0: 0:] + desc[find_cod + 1::]
-        codigos_len = len(codigos)
-        codigos_len = int(codigos_len)
+        #Aqui adiciona mais index de acordo com a palavra achada se foi no singular ou no plural a palavra Código
+        if(find_cod != None and variation_cod == 1):
+            find_cod = find_cod + 5
+        elif(find_cod != None and variation_cod == 2):
+            find_cod = find_cod + 6
+        print("Find Cod:", find_cod)
 
-    #print("Códigos:", codigos)
-    #print("Len Tamanho:", codigos_len)
+        #Vamos começar a limpar agora a string da descrição do anúncio para ter apenas os códigos das peças
+        if len(desc) > find_cod:
+            codigos = desc[0: 0:] + desc[find_cod + 1::]
+            codigos_len = len(codigos)
+            codigos_len = int(codigos_len)
 
-    #Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
-    find_last = codigos.find("Para")
-    if (find_last == None or find_last == -1):
-        find_last = codigos.find("Linha")
+        #print("Códigos:", codigos)
+        #print("Len Tamanho:", codigos_len)
 
-    find_last = int(find_last)
-    print("Find Last:", find_last)
+        #Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
+        find_last = codigos.find("Para")
+        if (find_last == None or find_last == -1):
+            find_last = codigos.find("Linha")
 
-    #Aqui começa a exclusão de caracteres da string baseado na posição dos caracteres
-    if len(codigos) > find_last:
-        codigos = codigos[0: find_last:] + codigos[codigos_len + 1::]
+        find_last = int(find_last)
+        print("Find Last:", find_last)
 
-    print("Códigos:", codigos)
+        #Aqui começa a exclusão de caracteres da string baseado na posição dos caracteres
+        if len(codigos) > find_last:
+            codigos = codigos[0: find_last:] + codigos[codigos_len + 1::]
 
-    #Continua eliminando caracteres a mais que não sejam códigos
-    codigos = codigos.replace(":", "")
-    codigos = codigos.replace("(Brinde)", "")
-    codigos = codigos.replace(" ", "")
-    codigos = codigos.replace("LinhaPesada", "")
-    codigos = codigos.replace("+", ",")
+        print("Códigos:", codigos)
 
-    #Após limpar toda a string e deixar apenas os códigos separados por "," vamos guardar os códigos como uma lista
-    lista_codigos = codigos.split(",")
-    print(lista_codigos.__len__())
+        #Continua eliminando caracteres a mais que não sejam códigos
+        codigos = codigos.replace(":", "")
+        codigos = codigos.replace("(Brinde)", "")
+        codigos = codigos.replace(" ", "")
+        codigos = codigos.replace("LinhaPesada", "")
+        codigos = codigos.replace("+", ",")
 
-    print("Chama a função CALC VERIRIFY")
-    calc_verify(lista_codigos)
+        #Após limpar toda a string e deixar apenas os códigos separados por "," vamos guardar os códigos como uma lista
+        lista_codigos = codigos.split(",")
+        print(lista_codigos.__len__())
 
-def calc_verify(lista_codigos):
+        print("Chama a função CALC VERIRIFY")
+        preco_venda = calc_verify(lista_codigos, conta, frete)
+        print("Preço de venda", preco_venda)
+
+        #Calcula diferença
+        if(preco_venda != "NÃO"):
+            dif_ = (preco_venda-preco)/preco*100
+            # Defini o status
+            if (dif_ < 2.0 and dif_ > -2.0):
+                status_ = "Correto"
+            else:
+                status_ = "Errado"
+        else:
+            status_ = "Não conseguiu calcular todos produtos"
+
+        contas.append(conta)
+        mlbs.append(cod)
+        precos_antigos.append(preco)
+        precos_corretos.append(preco_venda)
+        dif.append(dif_)
+        status.append(status_)
+        i = i+1
+
+    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status)
+
+def calc_verify(lista_codigos, conta, frete):
     i_for = 0
     qtd_i = 0
     custo = 0
     valores_vendas = []
-    qtds = []
-    len_lista_codigos = lista_codigos.__len__()
-    len_qtds = qtds.__len__()
+    qtds = 1
+    qtd_str = ""
+    bool_while = False #Para poder para o WHILE caso não ache a peça na base de dados
 
-    while(len_qtds < len_lista_codigos):
-        print(qtds)
-        qtds.append(1)
-        len_qtds = len_qtds+1
-
+    #Receber a base de dados dos códigos da peças e seus valores brutos
     df_base = pd.read_excel('Peças-Preços.xlsx')
-    print(df_base)
-    print(lista_codigos)
-    print(qtds)
 
-    while (i_for < lista_codigos.__len__()):
+    while (i_for < lista_codigos.__len__() and bool_while == False):
         for i in lista_codigos:
             print(i)
             if (i != "" or i != None):  # Checa se há algum valor no código da peça
                 print("Entrou no if dentro do for")
-                filtro = df_base.loc[df_base["Cod Peça"] == i.upper().strip()]  # Procura a linha com o código da peça
+
+                #Checando quantidade de peças que vai se é apenas um código ou duas vezes o mesmo código
+                check_units = str(i).lower()
+                print("Check_units,", check_units)
+                units = ['2x','3x','4x','5x','6x','7x','8x']
+
+                print("Vai entrar no for que checa quantidade de peças por código")
+                for un in units:
+                    unit_check = 0
+                    if(check_units.find(units[unit_check]) != -1):
+                        #print("Achou as seguintes unidades", units[unit_check])
+                        qtd_str2 = units[unit_check]
+                        qtd_str = qtd_str2
+                        codigo = i.replace(qtd_str2,"")
+                        qtd_str2 = qtd_str2.replace("x","")
+                        qtd_str2 = qtd_str2.replace("X", "")
+                        qtd = int(qtd_str2)
+                        #print("Quantidade de peça(s)", qtd)
+                        unit_check = units.__len__()
+                    else:
+                        #print("Não achou quantidades")
+                        codigo = i
+                        qtd = 1
+                        #print("Quantidade de peça(s)", qtd)
+                        unit_check = unit_check + 1
+
+                print('Saiu do for que checa a quantidade')
+                print('Peça', codigo)
+                print('Quantidades', qtd)
+
+                filtro = df_base.loc[df_base["Cod Peça"] == codigo.upper().strip()]  # Procura a linha com o código da peça
                 lista = list(
                     filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
                 print(lista)
 
                 # Caso a lista continue em branco é porque não achou a peça na planilha, um dos motivos pode ser a pesquisa em STR sendo que tem que ser em INT
                 if (lista == []):
-                    filtro = df_base.loc[df_base["Cod Peça"] == int(i)]  # Procura a linha com o código da peça
+                    #Abaixo segue uma sequencia de replaces para transformar o código que vai ter quantidade + x + código em apenas código
+                    codigo = i.replace(qtd_str,"")
+                    qtd_str = qtd_str.upper()
+                    codigo = i.replace(qtd_str,"")
+
+                    #Agora procura novamente o código na base de dados mas o transformando em INT
+                    filtro = df_base.loc[df_base["Cod Peça"] == int(codigo)]  # Procura a linha com o código da peça
                     lista = list(
                         filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
                 print(lista)
@@ -116,6 +185,7 @@ def calc_verify(lista_codigos):
 
                 # Verifica se tem valor na lista, se não tiver é porque não encontrou o código na planilha
                 if (lista != []):
+                    print("entrou no if lista != []")
                     # 0 = Fabricante, 1 = Linha, 2 = Código da Peça, 3 = Preço, 4 = Tipo de Peça(Escap, Fix, Catalisador)
                     fab = lista[0]
                     linha = lista[1]
@@ -124,16 +194,14 @@ def calc_verify(lista_codigos):
                     tipo = lista[4]
 
                     # Encontrando o indice da fabrica
-                    indice = indice_fabricante(fab, linha, tipo)
+                    indice = calc.indice_fabricante(fab, linha, tipo)
 
                     # Calculado quantidade de itens x o preço x o indice para ter assim o valor de custo
-                    print(qtd_i)
-                    qtd = int(qtds[qtd_i])
                     custo = qtd * preco * indice
                     print("Valor de Preço*Indice {}".format(custo))
 
                     # Chama função para definir as margens e checar regra de custo
-                    custo, margem_scapja, margem_soescap = margem(custo, fab, linha)
+                    custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha)
 
                     # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                     if (linha == "Leve" or linha == "Pesada"):
@@ -154,12 +222,18 @@ def calc_verify(lista_codigos):
                             venda_soescap = custo
                             valores_vendas.append(venda_soescap)
                     i_for = i_for + 1
-                    qtd_i = qtd_i + 1
+                    #qtd_i = qtd_i + 1
                 else:
-                    break
+                    bool_while = True #Apenas para quebrar o WHILE caso o código da peça não tenha sido achado dentro da base de dados
             else:
                 break
                 exit()
+
+    i_for = lista_codigos.__len__() #Para resolver o problema de quando não acha a peça na base de dados também, pois ele para de somar o i_for então
+                                    #precisamos igualar ele ao tamanho da lista de códigos para logo abaixo entrar no if que verifica se conseguiu calcular
+                                    #cada peça da lista de códigos
+    print("I_for",i_for)
+    print("Lista Codigos", lista_codigos.__len__())
 
     if (i_for == lista_codigos.__len__()):
         print(valores_vendas)
@@ -167,71 +241,49 @@ def calc_verify(lista_codigos):
             for i in range(9):
                 valores_vendas.append(0)
 
-        # Soma os valores de cada peça pra ter o valor de venda final
+        #Ve o custo do frete para somar ao preço de venda
+        if(type(frete) == int and frete <= 30):
+            custo_frete = 35
+        elif(type(frete) == int and frete > 30):
+            custo_frete = frete+5
+        else:
+            custo_frete = None
+
+        #Soma os valores de cada peça pra ter o valor de venda final
         venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(
-            valores_vendas[6]) + int(valores_vendas[8])
+            valores_vendas[6]) + int(valores_vendas[8]) + custo_frete
         venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(
-            valores_vendas[7]) + int(valores_vendas[9])
+            valores_vendas[7]) + int(valores_vendas[9]) + custo_frete
         venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(
             valores_vendas[7]) + int(valores_vendas[9]) + 3
-        print("Valor de Venda ScapJá: {}".format(venda_scapja))
-        print("Valor de Venda SoEscap: {}".format(venda_soescap))
-        print("Valor de Venda Tray: {}".format(venda_tray))
 
         print("Imprimir valores")
 
-        # Colocando os valores de venda na interface
-        string_venda = "Valor de venda na ScapJá: {}\n" \
-                       "Valor de venda na SoEscap: {}\n" \
-                       "Valor de venda na Tray: {}\n" \
-                       "\n" \
-                       "Os valores não tem o custo de frete incluso".format(venda_scapja, venda_soescap, venda_tray)
-
+        if(bool_while == False):
+            # Colocando os valores de venda na interface
+            string_venda = "Valor de venda na ScapJá: {}\n" \
+                           "Valor de venda na SoEscap: {}\n" \
+                           "Valor de venda na Tray: {}\n".format(venda_scapja, venda_soescap, venda_tray)
+        else:
+            # Colocando os valores de venda na interface
+            string_venda = "Valor de venda na ScapJá: {}\n" \
+                           "Valor de venda na SoEscap: {}\n" \
+                           "Valor de venda na Tray: {}\n"\
+                           "\n"\
+                           "Não conseguiu calcular todos os produtos".format(venda_scapja, venda_soescap, venda_tray)
         print(string_venda)
 
-def indice_fabricante(fab, linha, tipo):
-    fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix"]
+        #Defini qual valor vai retornar de venda de acordo com a conta pois o valor de venda muda de conta para conta
+        if(conta == "SCAPJA ESCAPAMENTOS"):
+            venda = venda_scapja
+        else:
+            venda = venda_soescap
 
-    #Atribuindo cada indice para cada fabricante
+        print(bool_while)
+        if(bool_while == True):
+            venda = "NÃO"
 
-    #Mastra
-    if(fab == fabricantes[0] and linha == "Leve" and tipo == "Escap"):
-        indice = 0.449
-    elif(fab == fabricantes[0] and linha == "Pesada" and tipo == "Escap"):
-        indice = 0.5466
-    elif(fab == fabricantes[0] and linha == "Leve" and tipo == "Catalisador"):
-        indice = 0.4413
-
-    #Pioneiro
-    if (fab == fabricantes[1]):
-        indice = 0.19
-
-    #Fixações
-    if(fab == fabricantes[4]):
-        indice = 1
-
-    return indice
-
-def margem(custo, fab, linha):
-    #Função para definir margem e também definir as regras para quando tivermos que usar o custo dele mesmo vezes 2
-    #Quando o custo de uma peça é inferior ou igual a R$65,00 ele precisa ser calculado X2 ignorando a margem normal de 175% e 165%
-
-    if(fab == "Mastra" and linha == "Leve" and custo <= 65):
-        custo = custo * 2
-        margem_scapja = 1
-        margem_soescap = 1
-    elif(fab == "Pioneiro" and linha == "Leve" and custo <= 65):
-        custo = custo * 2
-        margem_scapja = 1
-        margem_soescap = 1
-    elif(fab == "Mastra" and linha == "Pesada"):
-        margem_scapja = 2.15
-        margem_soescap = 2.04
-    else:
-        margem_scapja = 1.75
-        margem_soescap = 1.65
-
-    return custo, margem_scapja, margem_soescap
+    return venda
 
 if __name__ == '__main__':
     verificar()

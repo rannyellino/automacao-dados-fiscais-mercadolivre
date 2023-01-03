@@ -22,11 +22,11 @@ def teste():
     janela = Tk()
 
     #Lendo a tabela
-    df_base = pd.read_excel('DESC_TESTE.xlsx')
+    df_base = pd.read_excel('DESC_TESTE2.xlsx')
     print(df_base)
 
     #Guardando os valores de uma linha dentro de uma variavel
-    linha = df_base.loc[[1]]
+    linha = df_base.loc[[4]]
     print(linha)
     lista = list(linha.values.flatten())
     print(lista)
@@ -81,12 +81,16 @@ def teste():
 
     print("Códigos:", codigos)
 
-    #Continua eliminando caracteres a mais que não sejam códigos
+    # Continua eliminando caracteres a mais que não sejam códigos
     codigos = codigos.replace(":", "")
     codigos = codigos.replace("(Brinde)", "")
     codigos = codigos.replace(" ", "")
+    codigos = codigos.replace("LinhaPesada", "")
     codigos = codigos.replace("+", ",")
+
+    # Após limpar toda a string e deixar apenas os códigos separados por "," vamos guardar os códigos como uma lista
     lista_codigos = codigos.split(",")
+    print(lista_codigos.__len__())
 
     print("Lista Códigos", lista_codigos)
     print(type(lista_codigos))

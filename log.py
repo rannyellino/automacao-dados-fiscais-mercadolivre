@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 
 def criando_log(cod_finalizados, cod_erros):
     data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S') #Pega a data e hora atual e já formata
@@ -28,3 +29,10 @@ def log_elementos(locations, loc_um_produto, loc_login_tray):
     with open(nome_arquivo, 'a') as arquivo:
         arquivo.write(str(loc_login_tray))
         arquivo.write('\n')
+
+def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+    nome_arquivo = str(data_hora) + ".xlsx"
+    df = {'contas':contas,'mlbs':mlbs,'Preço Antigo':precos_antigos,'Preços Corretos':precos_corretos, 'Diferença':dif, "Status":status}
+    dataframe = pd.DataFrame(df)
+    dataframe.to_excel(nome_arquivo)

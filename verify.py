@@ -7,7 +7,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('DESC_TESTE2.xlsx')
+    df_base = pd.read_excel('DESC_TESTE5.xlsx')
     print(df_base)
     rows = len(df_base.index)
     i = 0
@@ -30,13 +30,13 @@ def verificar():
         print(lista)
 
         #LISTA
-        #0 = CONTA, 1 = Código do Anúncio, 4 = Descrição, 7 = Preço de Venda e 10 = Frete
+        #0 = CONTA, 1 = Código do Anúncio, 4 = Descrição, 7 = Preço de Venda, 10 = Frete e 19 = Se está com frete grátis
         conta = str(lista[0])
         cod = str(lista[1])
         desc = str(lista[4])
         preco = int(lista[7])
-        #frete = int(lista[10])
-        frete = 35
+        frete = int(lista[10])
+        frete_gratis = str(lista[19])
 
         #PROCURANDO CÓDIGO DAS PEÇAS
         variation_cod = 0 # 1 = "Código:", 2 = "Códigos"
@@ -93,7 +93,7 @@ def verificar():
         print(lista_codigos.__len__())
 
         print("Chama a função CALC VERIRIFY")
-        preco_venda = calc_verify(lista_codigos, conta, frete)
+        preco_venda = calc_verify(lista_codigos, conta, frete, frete_gratis)
         print("Preço de venda", preco_venda)
 
         #Calcula diferença
@@ -117,13 +117,11 @@ def verificar():
 
     log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status)
 
-def calc_verify(lista_codigos, conta, frete):
+def calc_verify(lista_codigos, conta, frete, frete_gratis):
     i_for = 0
     qtd_i = 0
     custo = 0
     valores_vendas = []
-    qtds = 1
-    qtd_str = ""
     bool_while = False #Para poder para o WHILE caso não ache a peça na base de dados
 
     #Receber a base de dados dos códigos da peças e seus valores brutos
@@ -131,6 +129,9 @@ def calc_verify(lista_codigos, conta, frete):
 
     while (i_for < lista_codigos.__len__() and bool_while == False):
         for i in lista_codigos:
+            unit_check = 0
+            qtd_str = ""
+            qtds = 1
             print(i)
             if (i != "" or i != None):  # Checa se há algum valor no código da peça
                 print("Entrou no if dentro do for")
@@ -142,9 +143,8 @@ def calc_verify(lista_codigos, conta, frete):
 
                 print("Vai entrar no for que checa quantidade de peças por código")
                 for un in units:
-                    unit_check = 0
                     if(check_units.find(units[unit_check]) != -1):
-                        #print("Achou as seguintes unidades", units[unit_check])
+                        print("Achou as seguintes unidades", units[unit_check])
                         qtd_str2 = units[unit_check]
                         qtd_str = qtd_str2
                         codigo = i.replace(qtd_str2,"")
@@ -153,12 +153,14 @@ def calc_verify(lista_codigos, conta, frete):
                         qtd = int(qtd_str2)
                         #print("Quantidade de peça(s)", qtd)
                         unit_check = units.__len__()
+                        break
                     else:
                         #print("Não achou quantidades")
                         codigo = i
                         qtd = 1
                         #print("Quantidade de peça(s)", qtd)
-                        unit_check = unit_check + 1
+                        if(unit_check < 6):
+                            unit_check = unit_check + 1
 
                 print('Saiu do for que checa a quantidade')
                 print('Peça', codigo)
@@ -171,17 +173,18 @@ def calc_verify(lista_codigos, conta, frete):
 
                 # Caso a lista continue em branco é porque não achou a peça na planilha, um dos motivos pode ser a pesquisa em STR sendo que tem que ser em INT
                 if (lista == []):
-                    #Abaixo segue uma sequencia de replaces para transformar o código que vai ter quantidade + x + código em apenas código
+                    i = i.lower()
+                    print(i)
                     codigo = i.replace(qtd_str,"")
-                    qtd_str = qtd_str.upper()
-                    codigo = i.replace(qtd_str,"")
-
-                    #Agora procura novamente o código na base de dados mas o transformando em INT
-                    filtro = df_base.loc[df_base["Cod Peça"] == int(codigo)]  # Procura a linha com o código da peça
-                    lista = list(
-                        filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
-                print(lista)
-
+                    print(codigo)
+                    print(qtd)
+                    try:
+                        filtro = df_base.loc[df_base["Cod Peça"] == int(codigo)]  # Procura a linha com o código da peça
+                        lista = list(filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
+                        print(lista)
+                    except ValueError:
+                        print("Erro, não conseguiu achar nenhum código equivalente na base de dados", codigo)
+                        bool_while = True
 
                 # Verifica se tem valor na lista, se não tiver é porque não encontrou o código na planilha
                 if (lista != []):
@@ -237,17 +240,17 @@ def calc_verify(lista_codigos, conta, frete):
 
     if (i_for == lista_codigos.__len__()):
         print(valores_vendas)
-        if (valores_vendas.__len__() < 9):
-            for i in range(9):
+        if (valores_vendas.__len__() < 12):
+            for i in range(12):
                 valores_vendas.append(0)
 
         #Ve o custo do frete para somar ao preço de venda
-        if(type(frete) == int and frete <= 30):
+        if(type(frete) == int and frete <= 30 and frete_gratis == "YES"):
             custo_frete = 35
-        elif(type(frete) == int and frete > 30):
+        elif(type(frete) == int and frete > 30 and frete_gratis == "YES"):
             custo_frete = frete+5
-        else:
-            custo_frete = None
+        elif(frete_gratis == "NO"):
+            custo_frete = 0
 
         #Soma os valores de cada peça pra ter o valor de venda final
         venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(

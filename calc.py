@@ -3,10 +3,10 @@ from tkinter import *
 import pandas as pd
 import openpyxl
 
-def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, cod_5):
+def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7):
     #Agrupando as quantidades e codigos dos anuncios
-    qtds = [qtd_1, qtd_2, qtd_3, qtd_4, qtd_5]
-    cods = [cod_1, cod_2, cod_3, cod_4, cod_5]
+    qtds = [qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7]
+    cods = [cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7]
     custo = 0
     valores_vendas = []
     i_for = 0
@@ -15,6 +15,10 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
 
 
     #Verificando os valores que tem na lista, o que não tiver valor é excluido da lista
+    if (cods[6] == ''):
+        cods.pop(6)
+    if (cods[5] == ''):
+        cods.pop(5)
     if(cods[4] == ''):
         cods.pop(4)
     if(cods[3] == ''):
@@ -45,6 +49,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
                     lista = list(filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
 
                 #Verifica se tem valor na lista, se não tiver é porque não encontrou o código na planilha
+                print(lista)
                 if(lista != []):
                     #0 = Fabricante, 1 = Linha, 2 = Código da Peça, 3 = Preço, 4 = Tipo de Peça(Escap, Fix, Catalisador)
                     fab = lista[0]
@@ -63,44 +68,58 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
                     print("Valor de Preço*Indice {}".format(custo))
 
                     #Chama função para definir as margens e checar regra de custo
-                    custo, margem_scapja, margem_soescap = margem(custo, fab, linha)
+                    custo, margem_scapja, margem_soescap = margem(custo, fab, linha, cods)
 
                     #Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                     if(linha == "Leve" or linha == "Pesada"):
                         venda_scapja = custo * margem_scapja
                         valores_vendas.append(venda_scapja)
+                        print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
                         venda_soescap = custo * margem_soescap
                         valores_vendas.append(venda_soescap)
+                        print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
                     elif(linha == "Fix"):
-                        if(custo > 50 and qtd < 2):
+                        if(custo > 50 and fab == "Fix" and preco > 50):
                             custo = custo * 0.7
                             venda_scapja = custo
                             valores_vendas.append(venda_scapja)
+                            print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
                             venda_soescap = custo
                             valores_vendas.append(venda_soescap)
+                            print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
                         else:
                             venda_scapja = custo
                             valores_vendas.append(venda_scapja)
+                            print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
                             venda_soescap = custo
                             valores_vendas.append(venda_soescap)
+                            print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
                     i_for = i_for+1
                     qtd_i = qtd_i+1
                 else:
+                    i_for = i_for + 1
                     break
             else:
+                i_for = i_for + 1
                 break
 
     if(i_for == cods.__len__()):
         print(valores_vendas)
-        if(valores_vendas.__len__() < 9):
-            for i in range(9):
+        if(valores_vendas.__len__() < 13):
+            for i in range(13):
                 valores_vendas.append(0)
 
 
         #Soma os valores de cada peça pra ter o valor de venda final
         venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8])
+        + int(valores_vendas[10]) + int(valores_vendas[12])
+
         venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9])
-        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + 3
+        + int(valores_vendas[11]) + int(valores_vendas[13])
+
+        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) \
+        + int(valores_vendas[11]) + int(valores_vendas[13]) + 3
+
         print("Valor de Venda ScapJá: {}".format(venda_scapja))
         print("Valor de Venda SoEscap: {}".format(venda_soescap))
         print("Valor de Venda Tray: {}".format(venda_tray))
@@ -114,7 +133,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, 
                        "\n" \
                        "Os valores não tem o custo de frete incluso".format(venda_scapja, venda_soescap, venda_tray)
         valores_venda_label = Label(janela, text=string_venda)
-        valores_venda_label.grid(column=0, row=9, columnspan=26)
+        valores_venda_label.grid(column=0, row=11, columnspan=26)
 
 def indice_fabricante(fab, linha, tipo):
     fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix"]
@@ -137,18 +156,33 @@ def indice_fabricante(fab, linha, tipo):
     if(fab == fabricantes[4]):
         indice = 1
 
+    #Alpha
+    if(fab == fabricantes[2]):
+        indice = 0.4505
+
+    #Amam
+    if(fab == fabricantes[3]):
+        indice = 0.21
+
     return indice
 
-def margem(custo, fab, linha):
+def margem(custo, fab, linha, cods):
     #Função para definir margem e também definir as regras para quando tivermos que usar o custo dele mesmo vezes 2
     #Quando o custo de uma peça é inferior ou igual a R$65,00 ele precisa ser calculado X2 ignorando a margem normal de 175% e 165%
 
-    if(fab == "Mastra" and linha == "Leve" and custo <= 65):
-        custo = custo * 2
+    qtd_cods = cods.__len__() #Checa a quantidade de códigos, pois se for acima de 1 não pode fazer o custo x2
+    print("Qtds Cods:", qtd_cods)
+
+    if(fab == "Mastra" and linha == "Leve" and custo <= 65 and qtd_cods < 2):
         margem_scapja = 1
         margem_soescap = 1
-    elif(fab == "Pioneiro" and linha == "Leve" and custo <= 65):
-        custo = custo * 2
+    elif(fab == "Pioneiro" and linha == "Leve" and custo <= 65 and qtd_cods < 2):
+        margem_scapja = 1
+        margem_soescap = 1
+    elif(fab == "Alpha" and linha == "Leve" and custo <= 65 and qtd_cods < 2):
+        margem_scapja = 1
+        margem_soescap = 1
+    elif(fab == "Amam" and linha == "Leve" and custo <= 65 and qtd_cods < 2):
         margem_scapja = 1
         margem_soescap = 1
     elif(fab == "Mastra" and linha == "Pesada"):

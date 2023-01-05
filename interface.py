@@ -174,11 +174,24 @@ def interface_calc():
     entry_cod_5 = Entry(janela, width=10)  # Input para código da peça
     entry_cod_5.grid(column=14, row=6, sticky=W)
 
+    entry_qtd_6 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_6.grid(column=13, row=7, sticky=W)
+    entry_qtd_6.insert(0, "1")
+    entry_cod_6 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_6.grid(column=14, row=7, sticky=W)
+
+    entry_qtd_7 = Entry(janela, width=2)  # Input para quantidade de peças
+    entry_qtd_7.grid(column=13, row=8, sticky=W)
+    entry_qtd_7.insert(0, "1")
+    entry_cod_7 = Entry(janela, width=10)  # Input para código da peça
+    entry_cod_7.grid(column=14, row=8, sticky=W)
+
     espaco = Label(janela, text="")
-    espaco.grid(column=0, row=7)  # Apenas dar espaço na interface
+    espaco.grid(column=0, row=9)  # Apenas dar espaço na interface
 
     botao_start = Button(janela, text="Calcular",command=lambda: main.pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2,
                                                                                            entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4,
-                                                                                           entry_qtd_5, entry_cod_5))
-    botao_start.grid(column=13, row=8, columnspan=2, sticky=W)
+                                                                                           entry_qtd_5, entry_cod_5, entry_qtd_6, entry_cod_6, entry_qtd_7,
+                                                                                           entry_cod_7))
+    botao_start.grid(column=13, row=10, columnspan=2, sticky=W)
 

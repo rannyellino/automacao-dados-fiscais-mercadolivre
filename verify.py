@@ -9,8 +9,10 @@ def verificar():
     #Lendo a tabela
     df_base = pd.read_excel('DESC_TESTE5.xlsx')
     print(df_base)
-    rows = len(df_base.index)
-    i = 0
+    rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
+    i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
+
+    #Abaixo são apenas variaveis para a criação do LOG no final dando o feedback de cada linha que o sistema verificou
     contas = []
     mlbs = []
     precos_antigos = []
@@ -18,7 +20,7 @@ def verificar():
     dif = []
     status = []
 
-    #Criando um for para passar por cada linha da planilha de base de dados
+    #Criando um loop para passar por cada linha da planilha de base de dados
     while i < rows:
         dif_ = None
         status_ = None
@@ -39,7 +41,7 @@ def verificar():
         frete_gratis = str(lista[19])
 
         #PROCURANDO CÓDIGO DAS PEÇAS
-        variation_cod = 0 # 1 = "Código:", 2 = "Códigos"
+        variation_cod = 0 # 1 = "Código:", 2 = "Códigos:"
 
         #Vai tentar achar a posição da palavra "Código:" se não achar vai tentar procurar a palavra "Códigos:", pois são os dois padrões que usamos
         find_cod = desc.find("Código:")
@@ -113,7 +115,7 @@ def verificar():
         precos_corretos.append(preco_venda)
         dif.append(dif_)
         status.append(status_)
-        i = i+1
+        i = i+1 #Para pular a linha
 
     log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status)
 

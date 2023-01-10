@@ -7,7 +7,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('DESC_TESTE5.xlsx')
+    df_base = pd.read_excel('DESC_TESTE7.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
@@ -38,7 +38,7 @@ def verificar():
         desc = str(lista[4])
         preco = int(lista[7])
         frete = int(lista[10])
-        frete_gratis = str(lista[19])
+        frete_gratis = str(lista[15])
 
         #PROCURANDO CÓDIGO DAS PEÇAS
         variation_cod = 0 # 1 = "Código:", 2 = "Códigos:"
@@ -85,7 +85,6 @@ def verificar():
 
         #Continua eliminando caracteres a mais que não sejam códigos
         codigos = codigos.replace(":", "")
-        codigos = codigos.replace("(Brinde)", "")
         codigos = codigos.replace(" ", "")
         codigos = codigos.replace("LinhaPesada", "")
         codigos = codigos.replace("+", ",")
@@ -125,17 +124,20 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
     custo = 0
     valores_vendas = []
     bool_while = False #Para poder para o WHILE caso não ache a peça na base de dados
+    have_brinde = False #Variavel que indica se tem brinde ou não, se tiver essa peça que é brinde não pode ser calculado
 
     #Receber a base de dados dos códigos da peças e seus valores brutos
     df_base = pd.read_excel('Peças-Preços.xlsx')
 
     while (i_for < lista_codigos.__len__() and bool_while == False):
         for i in lista_codigos:
-            unit_check = 0
+            unit_check = 0 #Checar na lista quantas unidades vai de peça caso seja mais de um
+            brinde_check = 0 #Checar na lista qual brinde vai no anuncio caso tenha algum
             qtd_str = ""
+            have_brinde = False
             qtds = 1
             print(i)
-            if (i != "" or i != None):  # Checa se há algum valor no código da peça
+            if (i != "" or i != None):  #Checa se há algum valor no código da peça
                 print("Entrou no if dentro do for")
 
                 #Checando quantidade de peças que vai se é apenas um código ou duas vezes o mesmo código
@@ -168,6 +170,40 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
                 print('Peça', codigo)
                 print('Quantidades', qtd)
 
+                #Agora irá checar se existe alguma peça como brinde pois esta não é calculada no preço
+                check_brinde = str(codigo).lower()
+                brindes = ['(brinde)', '(abraçadeira)', '(coxim)', '(junta)', 'anel']
+
+                print("Vai checar se existe brinde agora")
+                for i in brindes:
+                    if(check_brinde.find(brindes[brinde_check]) != -1):
+                        print("Foi achado o brinde", i)
+                        codigo = "X0X"
+                        have_brinde = True
+                        brinde_check = brindes.__len__()
+                        break
+                    else:
+                        print("Não foi achado brinde")
+                        if(brinde_check < 4):
+                            brinde_check = brinde_check + 1
+
+                #Já foi checado quantidade de códigos e brindes mas ainda precisa checar se existe código AMAM mascarado
+                #Quando o código da AMAM ta mascarado ele fica com um "S" antes do código e é feito uma soma do código real + 13259 e precisa ser checado isso também
+                check_mask_amam = str(codigo).lower()
+                mask_amam = "s"
+
+                print("Checa se há algum código amam", check_mask_amam, check_mask_amam.find(mask_amam))
+                if(check_mask_amam.find(mask_amam) == 0):
+                    print("O código AMAM está mascarado, index:", check_mask_amam.find(mask_amam))
+                    codigo = codigo.replace("s","")
+                    codigo = codigo.replace("S", "")
+                    codigo = int(codigo) - 13259
+                    codigo_str = str(codigo)
+                    codigo = codigo_str[:2] + '.' + codigo_str[2:]
+                    print("Código sem a mascara", codigo)
+
+                #Começa o processo de procurar o código na base de dados pra poder calcular o preço de venda
+                print("Começar a procura do código", codigo)
                 filtro = df_base.loc[df_base["Cod Peça"] == codigo.upper().strip()]  # Procura a linha com o código da peça
                 lista = list(
                     filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
@@ -175,9 +211,9 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
 
                 # Caso a lista continue em branco é porque não achou a peça na planilha, um dos motivos pode ser a pesquisa em STR sendo que tem que ser em INT
                 if (lista == []):
-                    i = i.lower()
-                    print(i)
-                    codigo = i.replace(qtd_str,"")
+                    codigo = codigo.lower()
+                    print(codigo)
+                    codigo = codigo.replace(qtd_str,"")
                     print(codigo)
                     print(qtd)
                     try:
@@ -187,6 +223,7 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
                     except ValueError:
                         print("Erro, não conseguiu achar nenhum código equivalente na base de dados", codigo)
                         bool_while = True
+
 
                 # Verifica se tem valor na lista, se não tiver é porque não encontrou o código na planilha
                 if (lista != []):
@@ -206,7 +243,7 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
                     print("Valor de Preço*Indice {}".format(custo))
 
                     # Chama função para definir as margens e checar regra de custo
-                    custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha)
+                    custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde)
 
                     # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                     if (linha == "Leve" or linha == "Pesada"):

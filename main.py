@@ -45,7 +45,7 @@ def pegando_valores_frete(entry_link_planilha_anuncios, entry_linha_coluna_anunc
         print("Não possui todos os valores preenchidos")
 
 def pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2, entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4, entry_qtd_5, entry_cod_5
-                         , entry_qtd_6, entry_cod_6, entry_qtd_7, entry_cod_7):
+                         , entry_qtd_6, entry_cod_6, entry_qtd_7, entry_cod_7, entry_frete):
     #Pegando os valores colocado na interface
     qtd_1 = entry_qtd_1.get()
     qtd_2 = entry_qtd_2.get()
@@ -61,9 +61,10 @@ def pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2, entry_co
     cod_5 = entry_cod_5.get()
     cod_6 = entry_cod_6.get()
     cod_7 = entry_cod_7.get()
+    custo_frete = entry_frete.get()
     janela = janela #Janela da interface e suas propriedades e elementos
 
-    calc.calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7)
+    calc.calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7, custo_frete)
 
 if __name__ == '__main__':
     main()

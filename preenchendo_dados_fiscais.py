@@ -227,6 +227,13 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pyautogui.click(elementos_loc[8], elementos_loc[9])
             colar_link()
 
+            #Preenche a unidade de medida comercial
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
+
+            pyautogui.write("UN")
+
             #Preenchendo Outros Dados
             pyautogui.hotkey("Tab")
             if(checa_catalisador == 1):
@@ -242,14 +249,18 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pausa_curta()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
+            um_segundo()
             pyautogui.write(cest) #Preenchendo CEST
             um_segundo()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")
-            pyautogui.click(elementos_loc[10], elementos_loc[11]) #Abrindo opções de origem
+            um_segundo()
+            pyautogui.hotkey("Enter")
+            #pyautogui.click(elementos_loc[10], elementos_loc[11]) #Abrindo opções de origem
             um_segundo()  # Espera segundos por precaução
             pyautogui.hotkey("Down")
             pyautogui.hotkey("Enter") #Selecionando Nacional
             pausa_curta()  # Espera segundos por precaução
+            um_segundo()
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS

@@ -115,19 +115,15 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, 
             for i in range(13):
                 valores_vendas.append(0)
 
-
         #Soma os valores de cada peça pra ter o valor de venda final
         print("Custo frete", custo_frete)
-        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8])
-        + int(valores_vendas[10]) + int(valores_vendas[12])
+        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8]) + int(valores_vendas[10]) + int(valores_vendas[12])
         venda_scapja = venda_scapja + custo_frete
 
-        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9])
-        + int(valores_vendas[11]) + int(valores_vendas[13])
+        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13])
         venda_soescap = venda_soescap + custo_frete
 
-        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) \
-        + int(valores_vendas[11]) + int(valores_vendas[13]) + 3
+        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13]) + 3
 
         print("Valor de Venda ScapJá: {}".format(venda_scapja))
         print("Valor de Venda SoEscap: {}".format(venda_soescap))
@@ -140,8 +136,13 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, 
                        "Valor de venda na SoEscap: {}\n" \
                        "Valor de venda na Tray: {}\n" \
                        "\n".format(venda_scapja, venda_soescap, venda_tray)
-        valores_venda_label = Label(janela, text=string_venda, font=interface.font_default())
-        valores_venda_label.grid(column=0, row=15, columnspan=26)
+        venda_label = Text(janela, height=3, width=40, borderwidth=0, font=interface.font_default())
+        venda_label.insert(1.0, string_venda)
+        venda_label.tag_configure("tag_name", justify="center")
+        venda_label.tag_add("tag_name", "1.0", "end")
+        #valores_venda_label = Label(janela, text=string_venda, font=interface.font_default())
+        venda_label.configure(state="disabled")
+        venda_label.grid(column=0, row=15, columnspan=26)
 
 def indice_fabricante(fab, linha, tipo):
     fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix"]

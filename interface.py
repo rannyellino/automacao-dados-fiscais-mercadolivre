@@ -234,6 +234,9 @@ def interface_calc():
     espaco = Label(janela, text="")
     espaco.grid(column=0, row=14)  # Apenas dar espaço na interface
 
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=16)  # Apenas dar espaço na interface
+
 def clear_calc(entry, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7):
 
     entry_cod_list = [entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7]

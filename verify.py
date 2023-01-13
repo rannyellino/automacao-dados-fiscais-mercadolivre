@@ -7,7 +7,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('DESC_TESTE7.xlsx')
+    df_base = pd.read_excel('DESC_TESTE9.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
@@ -19,6 +19,9 @@ def verificar():
     precos_corretos = []
     dif = []
     status = []
+    codigos_lista = []
+    zx_cods = []
+    px_cods = []
 
     #Criando um loop para passar por cada linha da planilha de base de dados
     while i < rows:
@@ -40,51 +43,12 @@ def verificar():
         frete = int(lista[10])
         frete_gratis = str(lista[15])
 
-        #PROCURANDO CÓDIGO DAS PEÇAS
-        variation_cod = 0 # 1 = "Código:", 2 = "Códigos:"
-
-        #Vai tentar achar a posição da palavra "Código:" se não achar vai tentar procurar a palavra "Códigos:", pois são os dois padrões que usamos
-        find_cod = desc.find("Código:")
-        variation_cod = 1
-        if(find_cod == None or find_cod == -1):
-            find_cod = desc.find("Códigos:")
-            variation_cod = 2
-
-        #Transforma em int para poder funcionar no método de exclusão de string atraves de index
-        find_cod = int(find_cod)
-
-        #Aqui adiciona mais index de acordo com a palavra achada se foi no singular ou no plural a palavra Código
-        if(find_cod != None and variation_cod == 1):
-            find_cod = find_cod + 5
-        elif(find_cod != None and variation_cod == 2):
-            find_cod = find_cod + 6
-        print("Find Cod:", find_cod)
-
-        #Vamos começar a limpar agora a string da descrição do anúncio para ter apenas os códigos das peças
-        if len(desc) > find_cod:
-            codigos = desc[0: 0:] + desc[find_cod + 1::]
-            codigos_len = len(codigos)
-            codigos_len = int(codigos_len)
-
-        #print("Códigos:", codigos)
-        #print("Len Tamanho:", codigos_len)
-
-        #Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
-        find_last = codigos.find("Para")
-        if (find_last == None or find_last == -1):
-            find_last = codigos.find("Linha")
-
-        find_last = int(find_last)
-        print("Find Last:", find_last)
-
-        #Aqui começa a exclusão de caracteres da string baseado na posição dos caracteres
-        if len(codigos) > find_last:
-            codigos = codigos[0: find_last:] + codigos[codigos_len + 1::]
-
-        print("Códigos:", codigos)
+        codigos = identificar_codigos(desc) #Chama função que vai identificar quais códigos de peças tem dentro da descrição
+        #identificar_acao_zx(desc, zx_cods, px_cods)
 
         #Continua eliminando caracteres a mais que não sejam códigos
         codigos = codigos.replace(":", "")
+        codigos_lista.append(codigos)# Adiciona na lista de códigos a sequencia de códigos do anuncio que o robo identificou
         codigos = codigos.replace(" ", "")
         codigos = codigos.replace("LinhaPesada", "")
         codigos = codigos.replace("+", ",")
@@ -116,7 +80,7 @@ def verificar():
         status.append(status_)
         i = i+1 #Para pular a linha
 
-    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status)
+    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista)
 
 def calc_verify(lista_codigos, conta, frete, frete_gratis):
     i_for = 0
@@ -193,14 +157,18 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
                 mask_amam = "s"
 
                 print("Checa se há algum código amam", check_mask_amam, check_mask_amam.find(mask_amam))
-                if(check_mask_amam.find(mask_amam) == 0):
+                if(check_mask_amam.find(mask_amam) == 0 and check_mask_amam.__len__() < 10):
                     print("O código AMAM está mascarado, index:", check_mask_amam.find(mask_amam))
                     codigo = codigo.replace("s","")
                     codigo = codigo.replace("S", "")
-                    codigo = int(codigo) - 13259
-                    codigo_str = str(codigo)
-                    codigo = codigo_str[:2] + '.' + codigo_str[2:]
-                    print("Código sem a mascara", codigo)
+                    try:
+                        codigo = int(codigo) - 13259
+                        codigo_str = str(codigo)
+                        codigo = codigo_str[:2] + '.' + codigo_str[2:]
+                        print("Código sem a mascara", codigo)
+                    except ValueError:
+                        print("Não é um código AMAM")
+                        bool_while = True
 
                 #Começa o processo de procurar o código na base de dados pra poder calcular o preço de venda
                 print("Começar a procura do código", codigo)
@@ -279,25 +247,37 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
 
     if (i_for == lista_codigos.__len__()):
         print(valores_vendas)
-        if (valores_vendas.__len__() < 12):
-            for i in range(12):
+        if (valores_vendas.__len__() < 13):
+            for i in range(13):
                 valores_vendas.append(0)
 
-        #Ve o custo do frete para somar ao preço de venda
-        if(type(frete) == int and frete <= 30 and frete_gratis == "YES"):
+        #Soma os valores de cada peça pra ter o valor de venda final
+        try:
+            valor_venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8]) + int(valores_vendas[10]) + int(valores_vendas[12])
+
+            valor_venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13])
+
+            venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13]) + 3
+        except IndexError:
+            valor_venda_scapja = 0
+            valor_venda_soescap= 0
+            venda_tray= 0
+            bool_while = True
+
+        # Ve o custo do frete para somar ao preço de venda
+        if (type(frete) == int and frete <= 30 and frete_gratis == "YES"):
             custo_frete = 35
-        elif(type(frete) == int and frete > 30 and frete_gratis == "YES"):
-            custo_frete = frete+5
-        elif(frete_gratis == "NO"):
+        elif (type(frete) == int and frete > 30 and frete_gratis == "YES"):
+            custo_frete = frete + 5
+        elif (frete_gratis == "NO" and valor_venda_scapja < 74):
+            custo_frete = 5.50
+        elif (frete_gratis == "NO" and valor_venda_soescap < 74):
+            custo_frete = 5.50
+        elif (frete_gratis == "NO"):
             custo_frete = 0
 
-        #Soma os valores de cada peça pra ter o valor de venda final
-        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(
-            valores_vendas[6]) + int(valores_vendas[8]) + custo_frete
-        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(
-            valores_vendas[7]) + int(valores_vendas[9]) + custo_frete
-        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(
-            valores_vendas[7]) + int(valores_vendas[9]) + 3
+        valor_venda_scapja = valor_venda_scapja + custo_frete
+        valor_venda_soescap = valor_venda_soescap + custo_frete
 
         print("Imprimir valores")
 
@@ -305,27 +285,161 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
             # Colocando os valores de venda na interface
             string_venda = "Valor de venda na ScapJá: {}\n" \
                            "Valor de venda na SoEscap: {}\n" \
-                           "Valor de venda na Tray: {}\n".format(venda_scapja, venda_soescap, venda_tray)
+                           "Valor de venda na Tray: {}\n".format(valor_venda_scapja, valor_venda_soescap, venda_tray)
         else:
             # Colocando os valores de venda na interface
             string_venda = "Valor de venda na ScapJá: {}\n" \
                            "Valor de venda na SoEscap: {}\n" \
                            "Valor de venda na Tray: {}\n"\
                            "\n"\
-                           "Não conseguiu calcular todos os produtos".format(venda_scapja, venda_soescap, venda_tray)
+                           "Não conseguiu calcular todos os produtos".format(valor_venda_scapja, valor_venda_soescap, venda_tray)
         print(string_venda)
 
         #Defini qual valor vai retornar de venda de acordo com a conta pois o valor de venda muda de conta para conta
         if(conta == "SCAPJA ESCAPAMENTOS"):
-            venda = venda_scapja
+            venda = valor_venda_scapja
         else:
-            venda = venda_soescap
+            venda = valor_venda_soescap
 
         print(bool_while)
         if(bool_while == True):
             venda = "NÃO"
 
     return venda
+
+def identificar_codigos(desc):
+    # PROCURANDO CÓDIGO DAS PEÇAS
+    variation_cod = 0  # 1 = "Código:", 2 = "Códigos:"
+
+    try:
+        # Vai tentar achar a posição da palavra "Código:" se não achar vai tentar procurar a palavra "Códigos:", pois são os dois padrões que usamos
+        find_cod = desc.find("Código:")
+        variation_cod = 1
+        if (find_cod == None or find_cod == -1):
+            find_cod = desc.find("Códigos:")
+            variation_cod = 2
+
+        # Transforma em int para poder funcionar no método de exclusão de string atraves de index
+        find_cod = int(find_cod)
+
+        # Aqui adiciona mais index de acordo com a palavra achada se foi no singular ou no plural a palavra Código
+        if (find_cod != None and variation_cod == 1):
+            find_cod = find_cod + 5
+        elif (find_cod != None and variation_cod == 2):
+            find_cod = find_cod + 6
+        print("Find Cod:", find_cod)
+
+        # Vamos começar a limpar agora a string da descrição do anúncio para ter apenas os códigos das peças
+        if len(desc) > find_cod:
+            codigos = desc[0: 0:] + desc[find_cod + 1::]
+            codigos_len = len(codigos)
+            codigos_len = int(codigos_len)
+
+        # Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
+        find_last = codigos.find("Para")
+        if (find_last == None or find_last == -1):
+            find_last = codigos.find("Linha")
+
+        find_last = int(find_last)
+        print("Find Last:", find_last)
+
+        # Aqui começa a exclusão de caracteres da string baseado na posição dos caracteres
+        if len(codigos) > find_last:
+            codigos = codigos[0: find_last:] + codigos[codigos_len + 1::]
+
+        print("Códigos:", codigos)
+
+        return codigos
+    except UnboundLocalError:
+        codigos = "00000000"
+        return codigos
+
+
+def identificar_acao_zx(desc, zx_cods, px_cods):
+    zx = "ZX"
+    px = "PX"
+    acoes = []
+    lista_zx_real = []
+    lista_px_real = []
+    px_real_string = ""
+    zx_real_string = ""
+    print(acoes)
+
+    # Adicionar números das ações
+    for i in range(50):
+        acoes.append(i)
+
+    # Agora começa a procurar códigos ZX e PX dentro da descrição e adiciona eles em uma lista para dar como feedback depois
+    for i in range(50):
+        have_zx = False
+        have_px = False
+        # Atribui o número de "i" para as nomeclaturas de ações ZX e PX
+        zx_real = zx + str(acoes[i])
+        px_real = px + str(acoes[i])
+
+        # Começa a checar agora os códigos ZX
+        if (desc.find(zx_real) != -1):  # Checa se na descrição achou algum código ZX
+            # As três linhas abaixo são para limpar a string 'desc' para ficar apenas os códigos ZX caso tenha achado
+            indice_desc_zx = desc.find(zx_real)
+            zx_real_string = desc[0: 0:] + desc[indice_desc_zx::]
+            print(zx_real_string)
+
+            # Caso tenha mais de um código vamos transformar esses códigos em lista para checar depois quais são esses códigos ZX
+            if (zx_real_string.find(" ") != -1):
+                zx_replace = zx_real_string.replace(" ", ",")
+                lista_zx_real = zx_replace.split(",")
+                print(lista_zx_real)
+
+            # Caso realmente tenha mais de um código e tenha transformado em uma lista esses códigos ZX ele vai checar se o valor da lista
+            # É igual o valor da variavel 'zx_real', isso porque as vezes o código zx_real = ZX1 e ele achando duas vezes ou mais na descrição valores
+            # Com o valor ZX1, Exemplo: 'ZX1', 'ZX11', 'ZX12', etc. Com isso acontecendo o if e for abaixo resolve isso pois ele vai checar qual desses códigos
+            # Está de fato certo
+            if (lista_zx_real.__len__() > 0):
+                for i in range(lista_zx_real.__len__()):
+                    if (lista_zx_real[i] == zx_real):
+                        zx_cods.append(zx_real)
+                        have_zx = True
+            elif (zx_real_string == zx_real):
+                zx_cods.append(zx_real)
+                have_zx = True
+
+        # Começa a checar agora os códigos PX
+        if (desc.find(px_real) != -1):  # Checa se na descrição achou algum código ZX
+            # As três linhas abaixo são para limpar a string 'desc' para ficar apenas os códigos ZX caso tenha achado
+            indice_desc_px = desc.find(px_real)
+            px_real_string = desc[0: 0:] + desc[indice_desc_px::]
+            print(px_real_string)
+
+            # Caso tenha mais de um código vamos transformar esses códigos em lista para checar depois quais são esses códigos ZX
+            if (px_real_string.find(" ") != -1):
+                px_replace = px_real_string.replace(" ", ",")
+                lista_px_real = px_replace.split(",")
+                print(lista_px_real)
+
+            # Caso realmente tenha mais de um código e tenha transformado em uma lista esses códigos ZX ele vai checar se o valor da lista
+            # É igual o valor da variavel 'zx_real', isso porque as vezes o código zx_real = ZX1 e ele achando duas vezes ou mais na descrição valores
+            # Com o valor ZX1, Exemplo: 'ZX1', 'ZX11', 'ZX12', etc. Com isso acontecendo o if e for abaixo resolve isso pois ele vai checar qual desses códigos
+            # Está de fato certo
+            if (lista_px_real.__len__() > 0):
+                for i in range(lista_px_real.__len__()):
+                    if (lista_px_real[i] == px_real):
+                        px_cods.append(px_real)
+                        have_px = True
+            elif (px_real_string == px_real):
+                px_cods.append(px_real)
+                have_px = True
+
+    #if(lista_px_real.__len__() <= 0 and px_real_string != px_real):
+        #px_cods.append("None")
+    #if(lista_zx_real.__len__() <= 0 and zx_real_string != zx_real):
+        #zx_cods.append("None")
+    if(have_zx == False):
+        zx_cods.append("None")
+    if(have_px == False):
+        px_cods.append("None")
+
+    print("Codigos ZX achados:", zx_cods)
+    print("Codigos PX achados:", px_cods)
 
 if __name__ == '__main__':
     verificar()

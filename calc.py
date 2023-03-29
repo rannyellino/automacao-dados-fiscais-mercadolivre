@@ -6,10 +6,10 @@ import openpyxl
 import interface
 
 
-def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7, custo_frete):
+def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, qtd_10, cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7, cod_8, cod_9, cod_10, custo_frete):
     #Agrupando as quantidades e codigos dos anuncios
-    qtds = [qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7]
-    cods = [cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7]
+    qtds = [qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, qtd_10]
+    cods = [cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7, cod_8, cod_9, cod_10]
     custo_frete = int(custo_frete)
     print("Custo de frete:", custo_frete)
     custo = 0
@@ -21,6 +21,12 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, 
 
 
     #Verificando os valores que tem na lista, o que não tiver valor é excluido da lista
+    if (cods[9] == ''):
+        cods.pop(9)
+    if (cods[8] == ''):
+        cods.pop(8)
+    if (cods[7] == ''):
+        cods.pop(7)
     if (cods[6] == ''):
         cods.pop(6)
     if (cods[5] == ''):
@@ -111,19 +117,27 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, 
 
     if(i_for == cods.__len__()):
         print(valores_vendas)
-        if(valores_vendas.__len__() < 13):
-            for i in range(13):
+        if(valores_vendas.__len__() < 19):
+            for i in range(19):
                 valores_vendas.append(0)
 
         #Soma os valores de cada peça pra ter o valor de venda final
         print("Custo frete", custo_frete)
-        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8]) + int(valores_vendas[10]) + int(valores_vendas[12])
+        venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) \
+                       + int(valores_vendas[8]) + int(valores_vendas[10]) + int(valores_vendas[12]) + int(valores_vendas[14]) \
+                       + int(valores_vendas[16]) + int(valores_vendas[18])
         venda_scapja = venda_scapja + custo_frete
 
-        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13])
+        venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) \
+                        + int(valores_vendas[11]) + int(valores_vendas[13]) + int(valores_vendas[15]) + int(valores_vendas[17]) + int(valores_vendas[19])
         venda_soescap = venda_soescap + custo_frete
 
-        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13]) + 3
+        venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) \
+                    + int(valores_vendas[11]) + int(valores_vendas[13]) + int(valores_vendas[15]) + int(valores_vendas[17]) + int(valores_vendas[19]) + 3
+        if (linha == "Pesada"):
+            venda_scapja = venda_scapja + (venda_scapja * 0.1)
+            venda_soescap = venda_soescap + (venda_soescap * 0.1)
+            venda_tray = venda_tray + (venda_tray * 0.1)
 
         print("Valor de Venda ScapJá: {}".format(venda_scapja))
         print("Valor de Venda SoEscap: {}".format(venda_soescap))
@@ -142,7 +156,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, cod_1, cod_2, 
         venda_label.tag_add("tag_name", "1.0", "end")
         #valores_venda_label = Label(janela, text=string_venda, font=interface.font_default())
         venda_label.configure(state="disabled")
-        venda_label.grid(column=0, row=15, columnspan=26)
+        venda_label.grid(column=0, row=19, columnspan=26)
 
 def indice_fabricante(fab, linha, tipo):
     fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix"]
@@ -159,7 +173,7 @@ def indice_fabricante(fab, linha, tipo):
 
     #Pioneiro
     if (fab == fabricantes[1]):
-        indice = 0.19
+        indice = 0.164
 
     #Fixações
     if(fab == fabricantes[4]):
@@ -171,7 +185,7 @@ def indice_fabricante(fab, linha, tipo):
 
     #Amam
     if(fab == fabricantes[3]):
-        indice = 0.21
+        indice = 0.22
 
     return indice
 

@@ -149,7 +149,9 @@ def interface_calc():
     entry_qtd_1.insert(0, "1")
     entry_cod_1 = Entry(janela, width=10, font=font_default())  # Input para código da peça
     entry_cod_1.grid(column=14, row=2, sticky=W)
-    clear_cod_1 = Button(janela, text="Clear", font=font_default(), command=lambda: clear_calc(0, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7))
+    clear_cod_1 = Button(janela, text="Clear", font=font_default(),
+                         command=lambda: clear_calc(0, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_1.grid(column=15, row=2, sticky=W)
 
     entry_qtd_2 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
@@ -159,7 +161,7 @@ def interface_calc():
     entry_cod_2.grid(column=14, row=3, sticky=W)
     clear_cod_2 = Button(janela, text="Clear", font=font_default(),
                          command=lambda: clear_calc(1, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
-                                                    entry_cod_6, entry_cod_7))
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_2.grid(column=15, row=3, sticky=W)
 
     entry_qtd_3 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
@@ -169,7 +171,7 @@ def interface_calc():
     entry_cod_3.grid(column=14, row=4, sticky=W)
     clear_cod_3 = Button(janela, text="Clear", font=font_default(),
                          command=lambda: clear_calc(2, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
-                                                    entry_cod_6, entry_cod_7))
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_3.grid(column=15, row=4, sticky=W)
 
     entry_qtd_4 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
@@ -179,7 +181,7 @@ def interface_calc():
     entry_cod_4.grid(column=14, row=5, sticky=W)
     clear_cod_4 = Button(janela, text="Clear", font=font_default(),
                          command=lambda: clear_calc(3, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
-                                                    entry_cod_6, entry_cod_7))
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_4.grid(column=15, row=5, sticky=W)
 
     entry_qtd_5 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
@@ -189,7 +191,7 @@ def interface_calc():
     entry_cod_5.grid(column=14, row=6, sticky=W)
     clear_cod_5 = Button(janela, text="Clear", font=font_default(),
                          command=lambda: clear_calc(4, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
-                                                    entry_cod_6, entry_cod_7))
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_5.grid(column=15, row=6, sticky=W)
 
     entry_qtd_6 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
@@ -199,7 +201,7 @@ def interface_calc():
     entry_cod_6.grid(column=14, row=7, sticky=W)
     clear_cod_6 = Button(janela, text="Clear", font=font_default(),
                          command=lambda: clear_calc(5, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
-                                                    entry_cod_6, entry_cod_7))
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_6.grid(column=15, row=7, sticky=W)
 
     entry_qtd_7 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
@@ -209,37 +211,68 @@ def interface_calc():
     entry_cod_7.grid(column=14, row=8, sticky=W)
     clear_cod_7 = Button(janela, text="Clear", font=font_default(),
                          command=lambda: clear_calc(6, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
-                                                    entry_cod_6, entry_cod_7))
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
     clear_cod_7.grid(column=15, row=8, sticky=W)
 
-    espaco = Label(janela, text="")
-    espaco.grid(column=0, row=9)  # Apenas dar espaço na interface
+    entry_qtd_8 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
+    entry_qtd_8.grid(column=13, row=9, sticky=W)
+    entry_qtd_8.insert(0, "1")
+    entry_cod_8 = Entry(janela, width=10, font=font_default())  # Input para código da peça
+    entry_cod_8.grid(column=14, row=9, sticky=W)
+    clear_cod_8 = Button(janela, text="Clear", font=font_default(),
+                         command=lambda: clear_calc(7, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
+    clear_cod_8.grid(column=15, row=9, sticky=W)
 
-    custo_frete_label = Label(janela, text="Custo do Frete", font=font_default()) #Label para indicar onde colocar o custo do frete
-    custo_frete_label.grid(column=13, row=10, columnspan=2)
+    entry_qtd_9 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
+    entry_qtd_9.grid(column=13, row=10, sticky=W)
+    entry_qtd_9.insert(0, "1")
+    entry_cod_9 = Entry(janela, width=10, font=font_default())  # Input para código da peça
+    entry_cod_9.grid(column=14, row=10, sticky=W)
+    clear_cod_9 = Button(janela, text="Clear", font=font_default(),
+                         command=lambda: clear_calc(8, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
+    clear_cod_9.grid(column=15, row=10, sticky=W)
 
-    entry_frete = Entry(janela, width=5, font=font_default())#Espaço para por o valor do frete
-    entry_frete.grid(column=13, row=11, columnspan=2)
-    entry_frete.insert(0,"35")
+    entry_qtd_10 = Entry(janela, width=2, font=font_default())  # Input para quantidade de peças
+    entry_qtd_10.grid(column=13, row=11, sticky=W)
+    entry_qtd_10.insert(0, "1")
+    entry_cod_10 = Entry(janela, width=10, font=font_default())  # Input para código da peça
+    entry_cod_10.grid(column=14, row=11, sticky=W)
+    clear_cod_10 = Button(janela, text="Clear", font=font_default(),
+                         command=lambda: clear_calc(9, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5,
+                                                    entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10))
+    clear_cod_10.grid(column=15, row=11, sticky=W)
 
     espaco = Label(janela, text="")
     espaco.grid(column=0, row=12)  # Apenas dar espaço na interface
 
+    custo_frete_label = Label(janela, text="Custo do Frete", font=font_default()) #Label para indicar onde colocar o custo do frete
+    custo_frete_label.grid(column=13, row=13, columnspan=2)
+
+    entry_frete = Entry(janela, width=5, font=font_default())#Espaço para por o valor do frete
+    entry_frete.grid(column=13, row=14, columnspan=2)
+    entry_frete.insert(0,"35")
+
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=15)  # Apenas dar espaço na interface
+
     botao_start = Button(janela, text="Calcular",command=lambda: main.pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2,
                                                                                            entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4,
                                                                                            entry_qtd_5, entry_cod_5, entry_qtd_6, entry_cod_6, entry_qtd_7,
-                                                                                           entry_cod_7, entry_frete), font=("Segoe UI", 17))
-    botao_start.grid(column=13, row=13, columnspan=2)
+                                                                                           entry_cod_7, entry_qtd_8, entry_cod_8, entry_qtd_9, entry_cod_9,
+                                                                                           entry_qtd_10, entry_cod_10, entry_frete), font=("Segoe UI", 17))
+    botao_start.grid(column=13, row=16, columnspan=2)
 
     espaco = Label(janela, text="")
-    espaco.grid(column=0, row=14)  # Apenas dar espaço na interface
+    espaco.grid(column=0, row=17)  # Apenas dar espaço na interface
 
     espaco = Label(janela, text="")
-    espaco.grid(column=0, row=16)  # Apenas dar espaço na interface
+    espaco.grid(column=0, row=20)  # Apenas dar espaço na interface
 
-def clear_calc(entry, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7):
+def clear_calc(entry, entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10):
 
-    entry_cod_list = [entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7]
+    entry_cod_list = [entry_cod_1, entry_cod_2, entry_cod_3, entry_cod_4, entry_cod_5, entry_cod_6, entry_cod_7, entry_cod_8, entry_cod_9, entry_cod_10]
     entry_cod_list[entry].delete(0, END)
 
 def font_default():

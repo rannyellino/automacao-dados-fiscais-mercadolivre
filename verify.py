@@ -7,7 +7,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('DESC_TESTE9.xlsx')
+    df_base = pd.read_excel('PROMO-SOESCAP-1.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
@@ -20,8 +20,6 @@ def verificar():
     dif = []
     status = []
     codigos_lista = []
-    zx_cods = []
-    px_cods = []
 
     #Criando um loop para passar por cada linha da planilha de base de dados
     while i < rows:
@@ -41,7 +39,7 @@ def verificar():
         desc = str(lista[4])
         preco = int(lista[7])
         frete = int(lista[10])
-        frete_gratis = str(lista[15])
+        frete_gratis = str(lista[12])
 
         codigos = identificar_codigos(desc) #Chama função que vai identificar quais códigos de peças tem dentro da descrição
         #identificar_acao_zx(desc, zx_cods, px_cods)
@@ -247,15 +245,15 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
 
     if (i_for == lista_codigos.__len__()):
         print(valores_vendas)
-        if (valores_vendas.__len__() < 13):
-            for i in range(13):
+        if (valores_vendas.__len__() < 23):
+            for i in range(23):
                 valores_vendas.append(0)
 
         #Soma os valores de cada peça pra ter o valor de venda final
         try:
-            valor_venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8]) + int(valores_vendas[10]) + int(valores_vendas[12])
+            valor_venda_scapja = int(valores_vendas[0]) + int(valores_vendas[2]) + int(valores_vendas[4]) + int(valores_vendas[6]) + int(valores_vendas[8]) + int(valores_vendas[10]) + int(valores_vendas[12]) + int(valores_vendas[14]) + int(valores_vendas[16]) + int(valores_vendas[18]) + int(valores_vendas[20]) + int(valores_vendas[22])
 
-            valor_venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13])
+            valor_venda_soescap = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13]) + int(valores_vendas[15]) + int(valores_vendas[17]) + int(valores_vendas[19]) + int(valores_vendas[21]) + int(valores_vendas[23])
 
             venda_tray = int(valores_vendas[1]) + int(valores_vendas[3]) + int(valores_vendas[5]) + int(valores_vendas[7]) + int(valores_vendas[9]) + int(valores_vendas[11]) + int(valores_vendas[13]) + 3
         except IndexError:
@@ -274,6 +272,9 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
         elif (frete_gratis == "NO" and valor_venda_soescap < 74):
             custo_frete = 5.50
         elif (frete_gratis == "NO"):
+            custo_frete = 0
+        else:
+            #Se chegar até aqui é porque o não foi identificado o código da peça e vai zerar o custo de frete só para não dar erro nas linhas abaixo
             custo_frete = 0
 
         valor_venda_scapja = valor_venda_scapja + custo_frete

@@ -164,6 +164,9 @@ cython_debug/
 #.idea/
 
 #TXT
-*.txt
+.txt
+
+#XLSX
+.xlsx
 
 # End of https://www.toptal.com/developers/gitignore/api/python

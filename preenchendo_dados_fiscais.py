@@ -472,9 +472,9 @@ def preenchendo_tray(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anu
             pausa_curta()
             chrome.find_element(By.TAG_NAME, "body").send_keys(Keys.CONTROL + 'f')  # Procurar Celula no Google Sheets
             pyautogui.hotkey('ctrl', 'f') #Abri a janela de procura
-            um_segundo()
+            pausa_curta()
             pyautogui.write(cod_anuncio_scapja) #Escreve o código da ScapJá
-            um_segundo()
+            pausa_curta()
             pyautogui.hotkey('enter') #Acha o código na planilha
             pyautogui.hotkey('esc') #Fecha a janela de procura
 

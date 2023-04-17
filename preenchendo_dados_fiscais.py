@@ -238,7 +238,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pyautogui.hotkey("Tab")
             if(checa_catalisador == 1):
                 ncm = "84213200"
-                cest = "0107500"
+                cest = "0199900"
             elif(checa_oleo == 1):
                 ncm = "27101932"
                 cest = "0600700"

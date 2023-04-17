@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 def abrindo_navegador(user):
     # Abrindo Chrome(NAVEGADOR PADRÃO DO WINDOWS)
     s = Service(ChromeDriverManager().install())

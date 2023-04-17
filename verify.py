@@ -4,10 +4,9 @@ import openpyxl
 import calc
 import log
 
-
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('PROMO-SOESCAP-1.xlsx')
+    df_base = pd.read_excel('SoEscap-Autoparts-16-04-23.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados

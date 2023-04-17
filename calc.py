@@ -158,6 +158,8 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
         venda_label.configure(state="disabled")
         venda_label.grid(column=0, row=19, columnspan=26)
 
+def margemBruta(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, cod_5, cod_01):
+
 def indice_fabricante(fab, linha, tipo):
     fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix"]
 

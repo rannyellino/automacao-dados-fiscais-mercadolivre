@@ -44,6 +44,24 @@ def pegando_valores_frete(entry_link_planilha_anuncios, entry_linha_coluna_anunc
     else:
         print("Não possui todos os valores preenchidos")
 
+def pegando_valores_margem(janela, entry_qtd_1, entry_cod_1, entry_qtd_2, entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4, entry_qtd_5, entry_cod_5,
+                           entry_cod_01):
+    # Pegando os valores colocado na interface
+    qtd_1 = entry_qtd_1.get()
+    qtd_2 = entry_qtd_2.get()
+    qtd_3 = entry_qtd_3.get()
+    qtd_4 = entry_qtd_4.get()
+    qtd_5 = entry_qtd_5.get()
+    cod_1 = entry_cod_1.get()
+    cod_2 = entry_cod_2.get()
+    cod_3 = entry_cod_3.get()
+    cod_4 = entry_cod_4.get()
+    cod_5 = entry_cod_5.get()
+    cod_01 = entry_cod_01.get()
+    janela = janela
+
+    calc.margemBruta(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, cod_4, cod_5, cod_01)
+
 def pegando_valores_calc(janela, entry_qtd_1, entry_cod_1, entry_qtd_2, entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4, entry_cod_4, entry_qtd_5, entry_cod_5
                          , entry_qtd_6, entry_cod_6, entry_qtd_7, entry_cod_7, entry_qtd_8, entry_cod_8, entry_qtd_9, entry_cod_9, entry_qtd_10, entry_cod_10, entry_frete):
     #Pegando os valores colocado na interface

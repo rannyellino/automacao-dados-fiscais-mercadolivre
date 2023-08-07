@@ -41,6 +41,58 @@ def main_interface():
     espaco = Label(janela, text="")
     espaco.grid(column=0, row=9)  # Apenas dar espaço na interface
 
+    botao_margem = Button(janela, text="Bianca Dropa AWP", command=lambda: interface_bianca())
+    botao_margem.grid(column=0, row=10)
+
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=11)  # Apenas dar espaço na interface
+
+    janela.mainloop()  # Deixando a janela aberta
+
+def interface_bianca():
+    # Criando interface
+    janela = Tk()  # Criando Janela
+    janela.title("Robo Brunão - Automatização E-COMMERCE")  # Alterando o título da Janela
+
+    texto_orientacao = Label(janela,
+                             text="   Preencha todos os valores abaixo para funcionar corretamente   ")  # Criando um texto
+    texto_orientacao.grid(column=0, row=0, columnspan=10)  # Indicando posição do texto
+
+    espaco = Label(janela, text="")
+    espaco.grid(column=0, row=1)  # Apenas dar espaço na interface
+
+    texto_conta = Label(janela, text="Conta")
+    texto_conta.grid(column=0, row=2, columnspan=10)
+    entry_conta = Entry(janela, width=20)  # Input para o link da planilha
+    entry_conta.grid(column=0, row=3, columnspan=10)
+
+    texto_cod_venda = Label(janela, text="Código da Última Venda")
+    texto_cod_venda.grid(column=0, row=4, columnspan=10)
+    entry_cod_venda = Entry(janela, width=50)  # Input para o link da planilha
+    entry_cod_venda.grid(column=0, row=5, columnspan=10)
+
+    texto_id = Label(janela, text="ID Último Contato")
+    texto_id.grid(column=0, row=6, columnspan=10)
+    entry_id = Entry(janela, width=20)  # Input para qual célula começa os anuncios
+    entry_id.grid(column=0, row=7, columnspan=10)
+
+    texto_user = Label(janela, text="Usuario")
+    texto_user.grid(column=0, row=8, columnspan=10)
+    entry_user = Entry(janela, width=20)  # Input para qual célula começa os anuncios
+    entry_user.grid(column=0, row=9, columnspan=10)
+
+    espaco2 = Label(janela, text="")
+    espaco2.grid(column=0, row=10)  # Apenas dar espaço na interface
+
+    botao_start = Button(janela, text="Começar Processo",
+                         command=lambda: main.pegando_valores_bianca(entry_conta,
+                                                                    entry_cod_venda, entry_id, entry_user,
+                                                                    janela))
+    botao_start.grid(column=0, row=11, columnspan=10)
+
+    espaco3 = Label(janela, text="")
+    espaco3.grid(column=0, row=12)  # Apenas dar espaço na interface
+
     janela.mainloop()  # Deixando a janela aberta
 
 def interface_margem():
@@ -118,14 +170,16 @@ def interface_margem():
     espaco = Label(janela, text="")
     espaco.grid(column=0, row=9)  # Apenas dar espaço na interface
 
-    botao_start = Button(janela, text="Calcular", font=font_default())
+    botao_start = Button(janela, text="Calcular", font=font_default(), command=lambda: main.pegando_valores_margem(janela, entry_qtd_1, entry_cod_1, entry_qtd_2,
+                                                                                                                   entry_cod_2, entry_qtd_3, entry_cod_3, entry_qtd_4,
+                                                                                                                   entry_cod_4, entry_qtd_5, entry_cod_5,entry_cod_01))
     botao_start.grid(column=4, row=10)
 
     espaco = Label(janela, text="")
     espaco.grid(column=0, row=11)  # Apenas dar espaço na interface
 
     espaco = Label(janela, text="")
-    espaco.grid(column=0, row=12)  # Apenas dar espaço na interface
+    espaco.grid(column=0, row=14)  # Apenas dar espaço na interface
 
 
 def interface_fiscais():
@@ -348,7 +402,19 @@ def interface_calc():
     espaco.grid(column=0, row=17)  # Apenas dar espaço na interface
 
     espaco = Label(janela, text="")
-    espaco.grid(column=0, row=20)  # Apenas dar espaço na interface
+    espaco.grid(column=0, row=22)  # Apenas dar espaço na interface
+
+def _onKeyRelease(event):
+    ctrl  = (event.state & 0x4) != 0
+    if event.keycode==88 and  ctrl and event.keysym.lower() != "x":
+        event.widget.event_generate("<<Cut>>")
+
+    if event.keycode==86 and  ctrl and event.keysym.lower() != "v":
+        event.widget.event_generate("<<Paste>>")
+
+    if event.keycode==67 and  ctrl and event.keysym.lower() != "c":
+        event.widget.event_generate("<<Copy>>")
+
 
 def clear_calc(entry_cod):
 

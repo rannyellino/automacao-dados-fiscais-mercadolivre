@@ -6,7 +6,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('SoEscap-Autoparts-16-04-23.xlsx')
+    df_base = pd.read_excel('soescap planilha 27-07-23.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
@@ -19,6 +19,11 @@ def verificar():
     dif = []
     status = []
     codigos_lista = []
+    total_pecas = []
+    titulos = []
+    tipo_peca = []
+    linha_peca = []
+    fab_peca = []
 
     #Criando um loop para passar por cada linha da planilha de base de dados
     while i < rows:
@@ -39,6 +44,7 @@ def verificar():
         preco = int(lista[7])
         frete = int(lista[10])
         frete_gratis = str(lista[12])
+        titulo = str(lista[3])
 
         codigos = identificar_codigos(desc) #Chama função que vai identificar quais códigos de peças tem dentro da descrição
         #identificar_acao_zx(desc, zx_cods, px_cods)
@@ -54,8 +60,13 @@ def verificar():
         lista_codigos = codigos.split(",")
         print(lista_codigos.__len__())
 
+        total_pecas.append(lista_codigos.__len__())
+
         print("Chama a função CALC VERIRIFY")
-        preco_venda = calc_verify(lista_codigos, conta, frete, frete_gratis)
+        preco_venda, tipo, linha, fab = calc_verify(lista_codigos, conta, frete, frete_gratis, titulo)
+        tipo_peca.append(tipo)
+        linha_peca.append(linha)
+        fab_peca.append(fab)
         print("Preço de venda", preco_venda)
 
         #Calcula diferença
@@ -74,16 +85,20 @@ def verificar():
         precos_antigos.append(preco)
         precos_corretos.append(preco_venda)
         dif.append(dif_)
+        titulos.append(titulo)
         status.append(status_)
         i = i+1 #Para pular a linha
 
-    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista)
+    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, linha_peca, tipo_peca, fab_peca)
 
-def calc_verify(lista_codigos, conta, frete, frete_gratis):
+def calc_verify(lista_codigos, conta, frete, frete_gratis, titulo):
     i_for = 0
     qtd_i = 0
     custo = 0
     valores_vendas = []
+    tipo_peca = []
+    linha_peca = []
+    fab_peca = []
     bool_while = False #Para poder para o WHILE caso não ache a peça na base de dados
     have_brinde = False #Variavel que indica se tem brinde ou não, se tiver essa peça que é brinde não pode ser calculado
 
@@ -200,41 +215,47 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
                     preco = lista[3]
                     tipo = lista[4]
 
-                    # Encontrando o indice da fabrica
-                    indice = calc.indice_fabricante(fab, linha, tipo)
+                    tipo_peca.append(tipo)
+                    linha_peca.append(linha)
+                    fab_peca.append(fab)
 
-                    # Calculado quantidade de itens x o preço x o indice para ter assim o valor de custo
-                    custo = qtd * preco * indice
-                    print("Valor de Preço*Indice {}".format(custo))
+                    if(preco != "Consulte"):
+                        print("entrou no if preco != Consulte")
+                        # Encontrando o indice da fabrica
+                        indice = calc.indice_fabricante(fab, linha, tipo)
 
-                    # Chama função para definir as margens e checar regra de custo
-                    custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde)
+                        # Calculado quantidade de itens x o preço x o indice para ter assim o valor de custo
+                        custo = qtd * preco * indice
+                        print("Valor de Preço*Indice {}".format(custo))
 
-                    # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
-                    if (linha == "Leve" or linha == "Pesada"):
-                        venda_scapja = custo * margem_scapja
-                        valores_vendas.append(venda_scapja)
-                        venda_soescap = custo * margem_soescap
-                        valores_vendas.append(venda_soescap)
-                    elif (linha == "Fix"):
-                        if (custo > 50 and qtd < 2):
-                            custo = custo * 0.7
-                            venda_scapja = custo
+                        # Chama função para definir as margens e checar regra de custo
+                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde)
+
+                        # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
+                        if (linha == "Leve" or linha == "Pesada"):
+                            venda_scapja = custo * margem_scapja
                             valores_vendas.append(venda_scapja)
-                            venda_soescap = custo
+                            venda_soescap = custo * margem_soescap
                             valores_vendas.append(venda_soescap)
-                        else:
-                            venda_scapja = custo
-                            valores_vendas.append(venda_scapja)
-                            venda_soescap = custo
-                            valores_vendas.append(venda_soescap)
-                    i_for = i_for + 1
-                    #qtd_i = qtd_i + 1
+                        elif (linha == "Fix"):
+                            if (custo > 50 and qtd < 2):
+                                custo = custo * 0.7
+                                venda_scapja = custo
+                                valores_vendas.append(venda_scapja)
+                                venda_soescap = custo
+                                valores_vendas.append(venda_soescap)
+                            else:
+                                venda_scapja = custo
+                                valores_vendas.append(venda_scapja)
+                                venda_soescap = custo
+                                valores_vendas.append(venda_soescap)
+                        i_for = i_for + 1
+                        #qtd_i = qtd_i + 1
+                    else:
+                        bool_while = True #Apenas para quebrar o WHILE caso o código da peça não tenha sido achado dentro da base de dados
+                        #i_for = i_for + 1
                 else:
-                    bool_while = True #Apenas para quebrar o WHILE caso o código da peça não tenha sido achado dentro da base de dados
-            else:
-                break
-                exit()
+                    bool_while = True
 
     i_for = lista_codigos.__len__() #Para resolver o problema de quando não acha a peça na base de dados também, pois ele para de somar o i_for então
                                     #precisamos igualar ele ao tamanho da lista de códigos para logo abaixo entrar no if que verifica se conseguiu calcular
@@ -305,7 +326,7 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis):
         if(bool_while == True):
             venda = "NÃO"
 
-    return venda
+    return venda, tipo_peca, linha_peca, fab_peca
 
 def identificar_codigos(desc):
     # PROCURANDO CÓDIGO DAS PEÇAS
@@ -353,93 +374,6 @@ def identificar_codigos(desc):
     except UnboundLocalError:
         codigos = "00000000"
         return codigos
-
-
-def identificar_acao_zx(desc, zx_cods, px_cods):
-    zx = "ZX"
-    px = "PX"
-    acoes = []
-    lista_zx_real = []
-    lista_px_real = []
-    px_real_string = ""
-    zx_real_string = ""
-    print(acoes)
-
-    # Adicionar números das ações
-    for i in range(50):
-        acoes.append(i)
-
-    # Agora começa a procurar códigos ZX e PX dentro da descrição e adiciona eles em uma lista para dar como feedback depois
-    for i in range(50):
-        have_zx = False
-        have_px = False
-        # Atribui o número de "i" para as nomeclaturas de ações ZX e PX
-        zx_real = zx + str(acoes[i])
-        px_real = px + str(acoes[i])
-
-        # Começa a checar agora os códigos ZX
-        if (desc.find(zx_real) != -1):  # Checa se na descrição achou algum código ZX
-            # As três linhas abaixo são para limpar a string 'desc' para ficar apenas os códigos ZX caso tenha achado
-            indice_desc_zx = desc.find(zx_real)
-            zx_real_string = desc[0: 0:] + desc[indice_desc_zx::]
-            print(zx_real_string)
-
-            # Caso tenha mais de um código vamos transformar esses códigos em lista para checar depois quais são esses códigos ZX
-            if (zx_real_string.find(" ") != -1):
-                zx_replace = zx_real_string.replace(" ", ",")
-                lista_zx_real = zx_replace.split(",")
-                print(lista_zx_real)
-
-            # Caso realmente tenha mais de um código e tenha transformado em uma lista esses códigos ZX ele vai checar se o valor da lista
-            # É igual o valor da variavel 'zx_real', isso porque as vezes o código zx_real = ZX1 e ele achando duas vezes ou mais na descrição valores
-            # Com o valor ZX1, Exemplo: 'ZX1', 'ZX11', 'ZX12', etc. Com isso acontecendo o if e for abaixo resolve isso pois ele vai checar qual desses códigos
-            # Está de fato certo
-            if (lista_zx_real.__len__() > 0):
-                for i in range(lista_zx_real.__len__()):
-                    if (lista_zx_real[i] == zx_real):
-                        zx_cods.append(zx_real)
-                        have_zx = True
-            elif (zx_real_string == zx_real):
-                zx_cods.append(zx_real)
-                have_zx = True
-
-        # Começa a checar agora os códigos PX
-        if (desc.find(px_real) != -1):  # Checa se na descrição achou algum código ZX
-            # As três linhas abaixo são para limpar a string 'desc' para ficar apenas os códigos ZX caso tenha achado
-            indice_desc_px = desc.find(px_real)
-            px_real_string = desc[0: 0:] + desc[indice_desc_px::]
-            print(px_real_string)
-
-            # Caso tenha mais de um código vamos transformar esses códigos em lista para checar depois quais são esses códigos ZX
-            if (px_real_string.find(" ") != -1):
-                px_replace = px_real_string.replace(" ", ",")
-                lista_px_real = px_replace.split(",")
-                print(lista_px_real)
-
-            # Caso realmente tenha mais de um código e tenha transformado em uma lista esses códigos ZX ele vai checar se o valor da lista
-            # É igual o valor da variavel 'zx_real', isso porque as vezes o código zx_real = ZX1 e ele achando duas vezes ou mais na descrição valores
-            # Com o valor ZX1, Exemplo: 'ZX1', 'ZX11', 'ZX12', etc. Com isso acontecendo o if e for abaixo resolve isso pois ele vai checar qual desses códigos
-            # Está de fato certo
-            if (lista_px_real.__len__() > 0):
-                for i in range(lista_px_real.__len__()):
-                    if (lista_px_real[i] == px_real):
-                        px_cods.append(px_real)
-                        have_px = True
-            elif (px_real_string == px_real):
-                px_cods.append(px_real)
-                have_px = True
-
-    #if(lista_px_real.__len__() <= 0 and px_real_string != px_real):
-        #px_cods.append("None")
-    #if(lista_zx_real.__len__() <= 0 and zx_real_string != zx_real):
-        #zx_cods.append("None")
-    if(have_zx == False):
-        zx_cods.append("None")
-    if(have_px == False):
-        px_cods.append("None")
-
-    print("Codigos ZX achados:", zx_cods)
-    print("Codigos PX achados:", px_cods)
 
 if __name__ == '__main__':
     verificar()

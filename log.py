@@ -30,9 +30,30 @@ def log_elementos(locations, loc_um_produto, loc_login_tray):
         arquivo.write(str(loc_login_tray))
         arquivo.write('\n')
 
-def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista):
+def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, linha_peca, tipo_peca, fab_peca):
     data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
     nome_arquivo = str(data_hora) + ".xlsx"
-    df = {'contas':contas,'mlbs':mlbs,'Peças':codigos_lista,'Preço Antigo':precos_antigos,'Preços Corretos':precos_corretos, 'Diferença':dif, "Status":status}
+    df = {'contas':contas,'mlbs':mlbs,'Título':titulos,'Fabricante':fab_peca,'Peças':codigos_lista,'Qtd Peças':total_pecas,'Linha Peças':linha_peca,'Tipo Peca':tipo_peca,'Preço Antigo':precos_antigos,'Preços Corretos':precos_corretos, 'Diferença':dif, "Status":status}
     dataframe = pd.DataFrame(df)
-    dataframe.to_excel(nome_arquivo)
+    dataframe.to_excel("LOG/"+nome_arquivo)
+
+def log_tray(sku, titulo, cods, total_peca, tipo_peca, linha_peca, fab_peca):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+    nome_arquivo = "Tray Linha Leve" + str(data_hora) + ".xlsx"
+    df = {'skus':sku,'Títulos':titulo,'Codígos':cods,'Qtd Peças':total_peca,'Linha':linha_peca,'Tipo Peças':tipo_peca,'Fabricante':fab_peca}
+    dataframe = pd.DataFrame(df)
+    dataframe.to_excel("LOG/"+nome_arquivo)
+
+def log_promo(cods, status):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+    nome_arquivo = "Promo-ScapJa " + str(data_hora) + ".xlsx"
+    df = {'Cod':cods,'Stats':status}
+    dataframe = pd.DataFrame(df)
+    dataframe.to_excel("LOG/"+nome_arquivo)
+
+def log_bianca(sells_noted, phone_noted, ids_noted):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+    nome_arquivo = "LOG BIANCA " + str(data_hora) + ".xlsx"
+    df = {'IDs':ids_noted,'Venda Anotadas':sells_noted,'Telefones':phone_noted}
+    dataframe = pd.DataFrame(df)
+    dataframe.to_excel("LOG/"+nome_arquivo)

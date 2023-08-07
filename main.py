@@ -3,10 +3,20 @@ import interface
 import preenchendo_dados_fiscais
 import frete
 import calc
+import bianca
 
 def main():
     #Criando interface
     interface.main_interface()
+
+def pegando_valores_bianca(entry_conta, entry_cod_venda, entry_id, entry_user,janela):
+    account = entry_conta.get()
+    cod_sell = entry_cod_venda.get()
+    id_contact = entry_id.get()
+    user = entry_user.get()
+    janela = janela
+
+    bianca.adicionar_contato(account, cod_sell, id_contact, user, janela)
 
 def pegando_valores_fiscais(entry_link_planilha_anuncios, entry_link_planilha_EAN, entry_linha_coluna_anuncios, entry_linha_coluna_ean, entry_qtd_anuncios, entry_conta, janela, entry_user):
     #Puxando todos valores do input da interface

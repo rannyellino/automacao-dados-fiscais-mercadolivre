@@ -6,16 +6,17 @@ from selenium.webdriver.common.by import By
 import log
 import navegador
 import pandas as pd
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, StaleElementReferenceException
 
 def incluir_promo():
-    user = "ranny"  # Setando usuário
-    button_xpath = '//*[@id="app-root-wrapper"]/div[1]/div/div[1]/div[6]/div/div/div/div/div[3]/div/div[1]/div/div[3]/button' #Botão Participar
-    button_xpath2 = '//*[@id="app-root-wrapper"]/div[1]/div/div[1]/div[6]/div/div/div/div/div[3]/div/div[2]/div[2]/div[3]/button'
+    user = "Administrator"  # Setando usuario
+    button_xpath = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div[3]/div[1]/div[1]/div[4]/button' #Botão Participar
+    button_xpath2 = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div[3]/div[1]/div[2]/div[4]/button'
+    button_xpath3 = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div/div/div[4]/div[1]/div[3]/div/div[3]/button'
     #autoparts = '//*[@id="app-root-wrapper"]/div[1]/div/div[1]/div[5]/div/div/div/div/div[3]/div/div[1]/span'
     #ofertas = '//*[@id="app-root-wrapper"]/div[1]/div/div[1]/div[5]/div/div/div/div/div[3]/div/div[2]/span'
-    _url = "https://www.mercadolivre.com.br/anuncios/lista/promos?page=1&search="
-    _url2 = ""
+    _url = "https://www.mercadolivre.com.br/anuncios/lista/promos?filters=seller_campaign_offer-c-mlb961381&page=1&search="
+    _url2 = "&task=c-mlb961381"
     em_processo = True
     cods_mlbs = []
     status_list = []
@@ -23,7 +24,7 @@ def incluir_promo():
     cods_alterados = []
     have_autoparts = False
 
-    df_base = pd.read_excel('promo catalisadores zx49 soescap.xlsx')
+    df_base = pd.read_excel('promo catalisadores 20% scapja 08-04-24.xlsx')
     print(df_base)
     rows = len(df_base.index)
     i = 0
@@ -48,12 +49,22 @@ def incluir_promo():
     while i < cods_mlbs.__len__():
         newurl = _url + str(cods_mlbs[i]) + _url2
 
+        jump = False
         chrome.execute_script("window.open('about:blank','promo');")
         pausa_curta()
         chrome.switch_to.window('promo')
         chrome.get(newurl)
         pausa_longa()
 
+        # try:
+        #     paused_xpath = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div/div/div[3]/p[1]'
+        #     p_paused = chrome.find_element(By.XPATH, paused_xpath)
+        #     jump = True
+        #     i = i + 1
+        # except NoSuchElementException:
+        #     jump = False
+
+        print("Jump: {}".format(jump))
 
         # try:
         #     autoparts_span = chrome.find_element(By.XPATH, autoparts)
@@ -70,32 +81,65 @@ def incluir_promo():
         # print(have_autoparts)
 
         # if(have_autoparts == True and have_ofertas == True):
-        try:
-            button_participar = chrome.find_element(By.XPATH, button_xpath2)
-            status = 'Okay'
-        except NoSuchElementException:
+        if(jump == False):
             try:
-                button_participar = chrome.find_element(By.XPATH, button_xpath)
-                status = 'Okay'
+                button_participar = chrome.find_element(By.XPATH, button_xpath2)
+                button_text = button_participar.text
+                if(button_text == "Deixar de participar"):
+                    status = 'Erro'
+                else:
+                    status = 'Okay'
+                    print("button_xpath2")
             except NoSuchElementException:
-                status = 'Erro'
+                try:
+                    button_participar = chrome.find_element(By.XPATH, button_xpath)
+                    button_text = button_participar.text
+                    if (button_text == "Deixar de participar"):
+                        status = 'Erro'
+                    else:
+                        status = 'Okay'
+                        print("button_xpath")
+                except NoSuchElementException:
+                    # try:
+                    #     button_participar = chrome.find_element(By.XPATH, button_xpath)
+                    #     status = 'Okay'
+                    # except NoSuchElementException:
+                         status = 'Erro'
 
-        print(cods_mlbs[i])
-        print(status)
+            print(cods_mlbs[i])
+            print(status)
 
-        time.sleep(1)
+            time.sleep(1)
 
-        if(status == 'Okay'):
-            button_participar.click()
-            pausa_curta()
-            pyautogui.click(x=562, y=832)
+            if(status == 'Okay'):
+                try:
+                    button_participar.click()
+                except (StaleElementReferenceException, NoSuchElementException) as e:
+                    status = 'Error'
+                pausa_curta()
+                button_click_x = '/html/body/div[6]/div/div/div[2]/div[3]/button[1]'
+                try:
+                    button_click = chrome.find_element(By.XPATH, button_click_x)
+                    button_click.click()
+                    status = 'Okay'
+                except NoSuchElementException:
+                    time.sleep(1.25)
+                    try:
+                        button_click = chrome.find_element(By.XPATH, button_click_x)
+                        button_click.click()
+                        status = 'Okay'
+                    except NoSuchElementException:
+                        status = 'Erro'
+                except ElementClickInterceptedException:
+                    print("ElementClickInterceptedException")
+                    status = 'Erro'
 
-        status_list.append(status)
-        cods_alterados.append(cods_mlbs[i])
+            status_list.append(status)
+            cods_alterados.append(cods_mlbs[i])
 
-        pausa_longa()
+            pausa_longa()
 
-        i = i+1
+            i = i+1
 
     log.log_promo(status_list, cods_alterados)
 

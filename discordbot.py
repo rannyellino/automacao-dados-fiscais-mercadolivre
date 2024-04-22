@@ -10,6 +10,7 @@ import calc
 import emoji
 import requests
 from datetime import datetime
+import googlesheets as gs
 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -28,7 +29,13 @@ class MyClient(discord.Client):
             #Achando o link e código MLB
             message_str = str(message.content)
             find_link = message_str.find("?verify")
+            shops_link = message_str.find("lojascapja")
+            shops = False
+            if (shops_link != -1):
+                shops = True
             link_mlb = message_str[0: 0:] + message_str[find_link + 8::]
+
+            await message.channel.send('Verificando...')
 
             #Código MLB
             find_cod_mlb = link_mlb.find("-")
@@ -38,10 +45,13 @@ class MyClient(discord.Client):
             cod_mlb = "MLB"+cod_mlb
 
             #Recebendo dados da API
-            account, preco_anuncio, frete_gratis, garantia, status, date_created = get_api(cod_mlb)
+            await message.channel.send('Recebendo dados da API...')
+            account, preco_anuncio, frete_gratis, garantia, status, date_created = get_api(cod_mlb, shops)
+
 
             chrome = open_link(link_mlb)
             one_sec()
+            await message.channel.send('Descobrindo os códigos das peças...')
 
             lista_codigos = []
 
@@ -50,16 +60,25 @@ class MyClient(discord.Client):
                 time.sleep(10)
                 chrome.refresh()
 
+            if(shops == True):
+                preco_anuncio = identify_price_shops(chrome)
+            elif(shops == False and account == 'ScapJá'):
+                preco_anuncio_shops = identify_price_shops(chrome)
+
             print("Lista Códigos {}".format(lista_codigos))
-            preco_correto = calc_parts(lista_codigos, chrome, account)
+            await message.channel.send('Calculando...')
+            preco_correto, pecas_consulte = calc_parts(lista_codigos, chrome, account)
+            close_chrome(chrome)
             diff = difference_price(preco_correto, preco_anuncio)
             resume_feedback_emoji = resume_feedback(diff, frete_gratis, garantia)
-            close_chrome(chrome)
 
             await message.channel.send(f'{message.author.mention}{os.linesep}{os.linesep}Link do anúncio: {link_mlb}{os.linesep}Cod do anúncio: {cod_mlb}{os.linesep}{os.linesep}'
                                        f'Conta: {account}{os.linesep}Peças: {lista_codigos}{os.linesep}{garantia}{os.linesep}'
                                        f'Status: {status}{os.linesep}Preço do Anuncio: R${preco_anuncio}{os.linesep}Preço Correto: R${preco_correto}{os.linesep}'
+                                       f'Peças Sob Consulte: {pecas_consulte}{os.linesep}'
                                        f'Diferença de Preço: {diff}%{os.linesep}{os.linesep}{resume_feedback_emoji}{os.linesep}{os.linesep}Data de Criação: {date_created}')
+
+            print("Firefox", chrome)
 
             # await message.channel.send(f'{message.author.mention} link do anuncio é '+"{}".format(link_mlb)
             #                            +f'{os.linesep}{os.linesep}'+"Anuncio na conta: {}".format(account)+f'{os.linesep}'
@@ -73,6 +92,7 @@ def calc_parts(lista_codigos, chrome, account):
     custo_frete = 35
     have_consulte = False
     have_pesada = False
+    fixacoes = []
 
     #Calcular o valor das peças mas antes de tudo precisamos checar se tem frete grátis
 
@@ -91,6 +111,7 @@ def calc_parts(lista_codigos, chrome, account):
     check_units = ['2x', '3x', '4x', '5x', '6x', '7x', '8x', '9x', '10x']
     qtds = []
     codigos = []
+    pecas_consulte = []
 
     for i in lista_codigos:
         for u in check_units:
@@ -128,6 +149,7 @@ def calc_parts(lista_codigos, chrome, account):
 
     # Pegando a planilha com os códigos das peças e preços
     df_base = pd.read_excel('Peças-Preços.xlsx')
+    #df_base = gs.main()
     print(df_base)
 
     i_for = 0
@@ -138,6 +160,7 @@ def calc_parts(lista_codigos, chrome, account):
             if (i != "" or i != None):  # Checa se há algum valor no código da peça
                 print("Entrou no if dentro do for")
                 print("Peça: {}".format(i))
+                print("Tipo Peça: {}".format(type(i)))
                 filtro = df_base.loc[df_base["Cod Peça"] == i.upper().strip()]  # Procura a linha com o código da peça
                 lista = list(
                     filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
@@ -170,18 +193,20 @@ def calc_parts(lista_codigos, chrome, account):
                     # Verifica se a peça é sob consulte
                     if (preco == "Consulte"):
                         have_consulte = True
-                        #pecas_consulte.append(cod)
+                        pecas_consulte.append(cod)
 
                     if (preco != "Consulte"):
                         have_brinde = False
 
                         # Calculado quantidade de itens x o preço x o indice para ter assim o valor de custo
-                        print("Quantidade Peça: ", qtd)
-                        custo = qtd * preco * indice
+                        print("Quantidade Peça: ", qtd, type(qtd))
+                        print("Preço Peça: ", preco, type(preco))
+                        print("Indice Peça: ", indice, type(indice))
+                        custo = qtd * int(preco) * indice
                         print("Valor de Preço*Indice {}".format(custo))
 
                         # Chama função para definir as margens e checar regra de custo
-                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, codigos, have_brinde)
+                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, codigos, have_brinde, tipo)
 
                         # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                         if (linha == "Leve" or linha == "Pesada"):
@@ -194,21 +219,25 @@ def calc_parts(lista_codigos, chrome, account):
                         if (linha == "Pesada"):
                             have_pesada = True
                         elif (linha == "Fix"):
-                            if (custo > 50 and fab == "Fix" and preco > 50):
-                                custo = custo * 0.7
-                                venda_scapja = custo
-                                valores_vendas.append(venda_scapja)
-                                print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
-                                venda_soescap = custo
-                                valores_vendas.append(venda_soescap)
-                                print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
-                            else:
-                                venda_scapja = custo
-                                valores_vendas.append(venda_scapja)
-                                print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
-                                venda_soescap = custo
-                                valores_vendas.append(venda_soescap)
-                                print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
+                            if (fab == "Fix"):
+                                try:
+                                    fixacoes.append(int(custo))
+                                except ValueError:
+                                    fixacoes.append(int(float(custo)))
+                            #     custo = custo * 0.7
+                            #     venda_scapja = custo
+                            #     valores_vendas.append(venda_scapja)
+                            #     print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
+                            #     venda_soescap = custo
+                            #     valores_vendas.append(venda_soescap)
+                            #     print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
+                            # else:
+                            #     venda_scapja = custo
+                            #     valores_vendas.append(venda_scapja)
+                            #     print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
+                            #     venda_soescap = custo
+                            #     valores_vendas.append(venda_soescap)
+                            #     print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
                         i_for = i_for + 1
                         qtd_i = qtd_i + 1
                     else:
@@ -222,6 +251,18 @@ def calc_parts(lista_codigos, chrome, account):
 
     if (i_for == codigos.__len__()):
         print(valores_vendas)
+
+        fix_price = calc.indetify_fix_price(fixacoes)
+
+        venda_scapja = fix_price
+        valores_vendas.append(venda_scapja)
+        print("Venda Scapjá:", venda_scapja)
+        venda_soescap = fix_price
+        valores_vendas.append(venda_soescap)
+        print("Venda SoEscap:", venda_soescap)
+
+        print(valores_vendas)
+
         if (valores_vendas.__len__() < 19):
             for i in range(19):
                 valores_vendas.append(0)
@@ -271,15 +312,19 @@ def calc_parts(lista_codigos, chrome, account):
 
         if(account == "ScapJá"):
             print("Conta: {} Valor de Venda: {}".format(account, venda_scapja))
-            return venda_scapja
+            return venda_scapja, round(venda_shops), pecas_consulte
         if(account == "SoEscap"):
             print("Conta: {} Valor de Venda: {}".format(account, venda_soescap))
-            return venda_soescap
+            return venda_soescap, 0, pecas_consulte
+        if (account == "ScapJá - SHOPS"):
+            print("Conta: {} Valor de Venda: {}".format(account, venda_shops))
+            return round(venda_shops), 0, pecas_consulte
 
 
 def close_chrome(chrome):
-    one_sec()
+    print("Chamou a função close_chrome")
     chrome.close()
+    chrome.quit()
 
 def resume_feedback(diff, frete_gratis, garantia):
     emojis_resume_list = []
@@ -315,7 +360,7 @@ def difference_price(preco_correto, preco_anuncio):
 
     return diff
 
-def get_api(cod_mlb):
+def get_api(cod_mlb, shops):
     #variaveis
     account = ""
     preco_anuncio = 0
@@ -342,9 +387,15 @@ def get_api(cod_mlb):
             account = "ScapJá"
         elif data["seller_id"] == 142839488:
             account = "SoEscap"
+        if(shops == True):
+            account = "ScapJá - SHOPS"
 
         #Salvando Preço
-        preco_anuncio = data["price"]
+        preco_anuncio = data["original_price"]
+
+        if (preco_anuncio == 'null' or preco_anuncio == 'Null' or preco_anuncio == None):
+            preco_anuncio = data["price"]
+
 
         #Salvando Frete Grátis
         if data["shipping"]["free_shipping"] == True:
@@ -390,34 +441,22 @@ def open_link(link_mlb):
 
     return chrome
 
-def identify_price(chrome):
-    price_xpath = '//*[@id="price"]/div/div[1]/div[1]/span/span[3]'
+def identify_price_shops(chrome):
+    price_xpath = '/html/body/main/div[2]/div[6]/div/div[1]/div/div/div[2]/div/div[1]/div[1]/span/span/span[2]'
 
     try:
-        price_element = chrome.find_element(By.XPATH, price_xpath)
-        price = int(price_element.text)
+        price = chrome.find_element(By.XPATH, price_xpath).text
+        price = price.replace(",",".")
+        price = price.replace(".", "")
+        try:
+            price = int(price)
+        except ValueError:
+            price = 0
+        print("PRICE? {}".format(price))
     except NoSuchElementException:
-        print("Não achou informações de preço")
+        print("Não conseguiu achar PRECO")
 
-    return price,
-
-def identify_account(chrome):
-    #Função focada em identificar em qual conta foi feito o anuncio
-
-    scapja_xpath = '//*[@id="price"]/div/div[1]/div[2]/p'
-    account = ''
-
-    try:
-        scapja_element = chrome.find_element(By.XPATH, scapja_xpath)
-        juros = scapja_element.text
-        if 'sem juros' in juros:
-            account = r'ScapJá'
-        else:
-            account = r'SoEscap'
-    except NoSuchElementException:
-        print("Não achou informações de juros")
-
-    return account
+    return price
 
 def identify_parts(chrome):
     #Função para verificar quais são os códigos das peças
@@ -463,4 +502,4 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = MyClient(intents=intents)
-client.run('MTEzMDg3NTkyNTExOTEwNzEzMw.GrnDDg.PnYj49II4Sf_Ik19rHtxwrIkE6YOS14-m06q_0')
+client.run('')

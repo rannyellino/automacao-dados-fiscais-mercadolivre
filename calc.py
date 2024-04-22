@@ -3,6 +3,7 @@ from tkinter import *
 import pandas as pd
 import openpyxl
 import pyperclip
+import googlesheets as gs
 
 import interface
 
@@ -21,7 +22,15 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
     have_brinde = False
     have_pesada = False
     have_consulte = False
+    have_nao_fabrica = False
     pecas_consulte = []
+    pecas_nao_fabrica = []
+    fabs = []
+    fixacoes = []
+    global sob_consulte
+    sob_consulte = Label(janela, text="", font=interface.font_default(), justify="center")
+    sob_consulte.grid(column=0, row=17, columnspan=1)
+    sob_consulte['text'] = ''
 
     #Verificando os valores que tem na lista, o que não tiver valor é excluido da lista
     if (cods[9] == ''):
@@ -59,7 +68,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
     print("Quantidades Limpas: {}".format(qtds))
 
     #Pegando a planilha com os códigos das peças e preços
-    df_base = pd.read_excel('Peças-Preços.xlsx')
+    df_base = gs.main()
     print(df_base)
 
     while(i_for < cods.__len__()):
@@ -86,9 +95,19 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
                     fab = lista[0]
                     linha = lista[1]
                     cod = lista[2]
-                    preco = lista[3]
+                    try:
+                        preco = int(lista[3])
+                    except ValueError:
+                        try:
+                            if(lista[3] != "Consulte" or lista[3] != "Nao Fabrica"):
+                                preco = int(float(lista[3]))
+                            else:
+                                preco = "Consulte"
+                        except ValueError:
+                            preco = lista[3]
                     tipo = lista[4]
 
+                    print("Preço: ", preco)
                     #Encontrando o indice da fabrica
                     indice = indice_fabricante(fab, linha, tipo)
 
@@ -101,14 +120,23 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
                         have_consulte = True
                         pecas_consulte.append(cod)
 
-                    if(preco != "Consulte"):
+                    # Verifica se a peça é sob consulte
+                    if (preco == "Nao Fabrica"):
+                        have_nao_fabrica = True
+                        pecas_nao_fabrica.append(cod)
+
+                    print("Peças Sob Consulte: {}".format(pecas_consulte))
+                    print("Peças Não Fabrica: {}".format(pecas_nao_fabrica))
+
+                    if(preco != "Consulte" and preco != "Nao Fabrica"):
                         #Calculado quantidade de itens x o preço x o indice para ter assim o valor de custo
+                        fabs.append(fab)
                         print("Quantidade Peça: ",qtd)
                         custo = qtd*preco*indice
                         print("Valor de Preço*Indice {}".format(custo))
 
                         #Chama função para definir as margens e checar regra de custo
-                        custo, margem_scapja, margem_soescap = margem(custo, fab, linha, cods, have_brinde)
+                        custo, margem_scapja, margem_soescap = margem(custo, fab, linha, cods, have_brinde, tipo)
 
                         #Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                         if(linha == "Leve" or linha == "Pesada"):
@@ -121,26 +149,27 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
                         if(linha == "Pesada"):
                             have_pesada = True
                         elif(linha == "Fix"):
-                            if(custo > 50 and fab == "Fix" and preco > 50):
-                                custo = custo * 0.7
-                                venda_scapja = custo
-                                valores_vendas.append(venda_scapja)
-                                print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
-                                venda_soescap = custo
-                                valores_vendas.append(venda_soescap)
-                                print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
-                            else:
-                                venda_scapja = custo
-                                valores_vendas.append(venda_scapja)
-                                print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
-                                venda_soescap = custo
-                                valores_vendas.append(venda_soescap)
-                                print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
+                            if(fab == "Fix"):
+                                fixacoes.append(int(custo))
+                            #     custo = custo * 0.7
+                            #     venda_scapja = custo
+                            #     valores_vendas.append(venda_scapja)
+                            #     print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
+                            #     venda_soescap = custo
+                            #     valores_vendas.append(venda_soescap)
+                            #     print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
+                            # else:
+                            #     venda_scapja = custo
+                            #     valores_vendas.append(venda_scapja)
+                            #     print("Venda Scapjá:", venda_scapja, "Margem:", margem_scapja)
+                            #     venda_soescap = custo
+                            #     valores_vendas.append(venda_soescap)
+                            #     print("Venda SoEscap:", venda_soescap, "Margem:", margem_soescap)
                         i_for = i_for+1
                         qtd_i = qtd_i+1
                     else:
                         i_for = i_for + 1
-                        break
+                        #break
                 else:
                     have_consulte = True
                     pecas_consulte.append(i)
@@ -153,7 +182,18 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
     if(i_for == cods.__len__()):
         print("HAVE PESADA2: ", have_pesada)
         print("HAVE CONSULTE2: ", have_consulte)
+
+        fix_price = indetify_fix_price(fixacoes)
+
+        venda_scapja = fix_price
+        valores_vendas.append(venda_scapja)
+        print("Venda Scapjá:", venda_scapja)
+        venda_soescap = fix_price
+        valores_vendas.append(venda_soescap)
+        print("Venda SoEscap:", venda_soescap)
+
         print(valores_vendas)
+
         if(valores_vendas.__len__() < 19):
             for i in range(19):
                 valores_vendas.append(0)
@@ -199,14 +239,16 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
         print("Imprimir valores")
 
         #Criando a area que aparece as peças que estão sob consulte
-        global sob_consulte
-        sob_consulte = Label(janela, text="", font=interface.font_default())
         sob_consulte.grid(column=0, row=17, columnspan=26)
 
-        if(have_consulte == True):
-            sob_consulte['text'] = "Peças Sob Consulte: {}".format(pecas_consulte)
+        if(have_nao_fabrica == True and have_consulte == True):
+            sob_consulte['text'] = "                                         Peças Sob Consulte e Não Fabrica: {}, {}                                 ".format(pecas_consulte, pecas_nao_fabrica)
+        elif(have_nao_fabrica == True):
+            sob_consulte['text'] = "                                         Peças Não Fabrica: {}                                  ".format(pecas_nao_fabrica)
+        elif(have_consulte == True):
+            sob_consulte['text'] = "                                         Peças Sob Consulte: {}                                  ".format(pecas_consulte)
         else:
-            sob_consulte['text'] = "                                                                                                                               "
+            sob_consulte['text'] = "                                         Fabs: {}                                                ".format(fabs)
 
         #Colocando os valores de venda na interface
         string_venda = "Valor de venda na ScapJá: {}\n" \
@@ -270,7 +312,7 @@ def margemBruta(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, 
     print(cods)
 
     # Pegando a planilha com os códigos das peças e preços
-    df_base = pd.read_excel('Peças-Preços.xlsx')
+    df_base = gs.main()
     print(df_base)
 
     while (i_for < cods.__len__()):
@@ -347,7 +389,8 @@ def margemBruta(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, cod_1, cod_2, cod_3, 
     venda_label.grid(column=0, row=13, columnspan=26)
 
 def indice_fabricante(fab, linha, tipo):
-    fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix", "Nalu"]
+    fabricantes = ["Mastra", "Pioneiro", "Alpha", "Amam", "Fix", "Nalu", "J.L.F"]
+    indice = 0
 
     #Atribuindo cada indice para cada fabricante
 
@@ -355,13 +398,17 @@ def indice_fabricante(fab, linha, tipo):
     if(fab == fabricantes[0] and linha == "Leve" and tipo == "Escap"):
         indice = 0.4723
     elif(fab == fabricantes[0] and linha == "Pesada" and tipo == "Escap"):
-        indice = 0.5466
+        indice = 0.5750
     elif(fab == fabricantes[0] and linha == "Leve" and tipo == "Catalisador"):
         indice = 0.3799
+    elif (fab == fabricantes[0] and linha == "Leve" and tipo == "Flexivel"):
+        indice = 1
 
     #Pioneiro
     if (fab == fabricantes[1]):
-        indice = 0.1725
+        indice = 0.1640
+    elif(fab == fabricantes[1] and tipo == "Flexivel"):
+        indice = 1
 
     if (fab == fabricantes[1] and tipo == "Catalisador"):
         indice = 2
@@ -370,48 +417,144 @@ def indice_fabricante(fab, linha, tipo):
     if(fab == fabricantes[4]):
         indice = 1
 
+    # Fixações
+    if(fab == fabricantes[4]):
+            indice = 1
+
     #Alpha
     if(fab == fabricantes[2]):
         indice = 0.4739
 
     #Amam
     if(fab == fabricantes[3]):
-        indice = 0.22
+        indice = 0.2212
 
     #Nalu
     if(fab == fabricantes[5] and tipo == "Catalisador"):
         indice = 2
 
+    # J.L.F
+    if (fab == fabricantes[6]):
+        indice = 1
+
+    if(indice == None or indice == 0):
+        indice = 1
+
+    # J.L.F
+    if (fab == "ZZ"):
+            indice = 1
+
     return indice
 
-def margem(custo, fab, linha, cods, have_brinde):
+def margem(custo, fab, linha, cods, have_brinde, tipo):
     #Função para definir margem e também definir as regras para quando tivermos que usar o custo dele mesmo vezes 2
     #Quando o custo de uma peça é inferior ou igual a R$65,00 ele precisa ser calculado X2 ignorando a margem normal de 175% e 165%
 
+    print("Cods: {}".format(cods))
     qtd_cods = cods.__len__() #Checa a quantidade de códigos, pois se for acima de 1 não pode fazer o custo x2
     print("Qtds Cods:", qtd_cods)
 
-    if(fab == "Mastra" and linha == "Leve" and custo <= 65 and qtd_cods < 2 and have_brinde == False):
+    double = check_fix(cods, linha)
+
+    if(fab == "Mastra" and linha == "Leve" and custo <= 65 and double == True and have_brinde == False):
         custo = custo * 2
         margem_scapja = 1
         margem_soescap = 1
-    elif(fab == "Pioneiro" and linha == "Leve" and custo <= 65 and qtd_cods < 2 and have_brinde == False):
+    elif(fab == "Pioneiro" and linha == "Leve" and custo <= 65 and double == True and have_brinde == False):
         custo = custo * 2
         margem_scapja = 1
         margem_soescap = 1
-    elif(fab == "Alpha" and linha == "Leve" and custo <= 65 and qtd_cods < 2 and have_brinde == False):
+    elif(fab == "Alpha" and linha == "Leve" and custo <= 65 and double == True and have_brinde == False):
         custo = custo * 2
         margem_scapja = 1
         margem_soescap = 1
-    elif(fab == "Amam" and linha == "Leve" and custo <= 65 and qtd_cods < 2 and have_brinde == False):
+    elif(fab == "Amam" and linha == "Leve" and custo <= 65 and double == True and have_brinde == False):
         custo = custo * 2
         margem_scapja = 1
         margem_soescap = 1
     elif(fab == "Mastra" and linha == "Pesada"):
         margem_scapja = 2.15
         margem_soescap = 2.04
-    else:
+    elif(tipo == "Catalisador"):
         margem_scapja = 1.75
         margem_soescap = 1.65
+    else:
+        margem_scapja = 1.81
+        margem_soescap = 1.68
 
     return custo, margem_scapja, margem_soescap
+
+def check_fix(cods, linha):
+    #Essa função é para checar se só uma das peças é escapamento mesmo e o resto tudo fixação, isso é para poder multiplicar o custo da peça x2
+    double = False
+    parts = 0
+    z = 0
+    linhas = []
+
+    # Pegando a planilha com os códigos das peças e preços
+    df_base = pd.read_excel('Peças-Preços.xlsx')
+    #df_base = gs.main()
+
+    for i in cods:
+        print("Código Check Fix: {}".format(i))
+        if(type(i) == str and "Brinde" in i):
+            cods.remove(i)
+            print("Removeu Código")
+        else:
+            filtro = df_base.loc[df_base["Cod Peça"] == i.upper().strip()]  # Procura a linha com o código da peça
+            lista = list(filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
+
+            # Caso a lista continue em branco é porque não achou a peça na planilha, um dos motivos pode ser a pesquisa em STR sendo que tem que ser em INT
+            try:
+                if (lista == []):
+                    filtro = df_base.loc[df_base["Cod Peça"] == int(i)]  # Procura a linha com o código da peça
+                    lista = list(
+                        filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
+                    print("Lista = [] 1 ", lista, " I: ", i)
+                elif (lista == []):
+                    filtro = df_base.loc[df_base["Cod Peça"] == str(i)]  # Procura a linha com o código da peça
+                    lista = list(
+                        filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
+                    print("Lista = [] 2 ", lista, " I: ", i)
+                elif (lista == []):
+                    print("Não achou a peça na base de dados")
+                    continue
+                else:
+                    linha = lista[1]
+                    linhas.append(linha)
+            except ValueError:
+                print("Não achou a peça na base de dados")
+                continue
+
+    print(linhas)
+
+    for x in cods:
+        print(x, " in ", cods)
+        try:
+            print(cods)
+            print("Z: {}, Parts: {}".format(z, parts))
+            if(linhas[z] == "Leve"):
+                parts = parts+1
+            z = z+1
+        except IndexError:
+            print("Except IndexError")
+
+    if(parts == 1):
+        double = True
+
+    print("Double: {}".format(double))
+    return double
+
+def indetify_fix_price(fixacoes):
+    print("LISTA DE FIXAÇÕES: {}".format(fixacoes))
+    fix_price = 0
+
+    for x in fixacoes:
+        fix_price = fix_price + x
+
+    print("Fix Price: {}".format(fix_price))
+
+    if (fix_price > 90):
+        fix_price = fix_price - (fix_price * 0.3)
+
+    return fix_price

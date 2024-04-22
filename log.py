@@ -30,12 +30,19 @@ def log_elementos(locations, loc_um_produto, loc_login_tray):
         arquivo.write(str(loc_login_tray))
         arquivo.write('\n')
 
-def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, linha_peca, tipo_peca, fab_peca):
+def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, linha_peca, tipo_peca, fab_peca, montadoras, carros):
+# def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, montadoras, carros, custos):
     data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
     nome_arquivo = str(data_hora) + ".xlsx"
-    df = {'contas':contas,'mlbs':mlbs,'Título':titulos,'Fabricante':fab_peca,'Peças':codigos_lista,'Qtd Peças':total_pecas,'Linha Peças':linha_peca,'Tipo Peca':tipo_peca,'Preço Antigo':precos_antigos,'Preços Corretos':precos_corretos, 'Diferença':dif, "Status":status}
+    df = {'contas':contas,'mlbs':mlbs,'Título':titulos,'Fabricante':fab_peca,'Peças':codigos_lista,'Qtd Peças':total_pecas,'Linha':linha_peca,'Tipo':tipo_peca,
+          'Montadora':montadoras,'Carros':carros,'Preço Antigo':precos_antigos,'Preços Corretos':precos_corretos, 'Diferença':dif, "Status":status}
+    # df = {'contas': contas, 'mlbs': mlbs, 'Título': titulos, 'Peças': codigos_lista,
+    #       'Qtd Peças': total_pecas,'Montadora': montadoras, 'Carros': carros, 'Preço Antigo': precos_antigos, 'Preços Corretos': precos_corretos,
+    #       'Diferença': dif, "Status": status, "Custos": custos}
     dataframe = pd.DataFrame(df)
+    print(dataframe)
     dataframe.to_excel("LOG/"+nome_arquivo)
+    print("LOG/"+nome_arquivo)
 
 def log_tray(sku, titulo, cods, total_peca, tipo_peca, linha_peca, fab_peca):
     data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
@@ -55,5 +62,12 @@ def log_bianca(sells_noted, phone_noted, ids_noted):
     data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
     nome_arquivo = "LOG BIANCA " + str(data_hora) + ".xlsx"
     df = {'IDs':ids_noted,'Venda Anotadas':sells_noted,'Telefones':phone_noted}
+    dataframe = pd.DataFrame(df)
+    dataframe.to_excel("LOG/"+nome_arquivo)
+
+def log_imagens(cods, titles, size1_list, size2_list, size3_list, status_list):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+    nome_arquivo = "LOG IMAGENS " + str(data_hora) + ".xlsx"
+    df = {'IDs':cods,'Título':titles,'Tamanho 1':size1_list,'Tamanho 2':size2_list,'Tamanho 3':size3_list,'Status':status_list}
     dataframe = pd.DataFrame(df)
     dataframe.to_excel("LOG/"+nome_arquivo)

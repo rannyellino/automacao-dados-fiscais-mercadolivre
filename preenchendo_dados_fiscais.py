@@ -57,6 +57,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
         checa_catalisador = 0 #Variavel dedicada para o sistema de verificação se contém catalisador no anuncio ou não
                               #Sempre ela vai iniciar com o valor de 0 em cada ciclo
         checa_oleo = 0 #Variavel dedicada para o sistema de verificação se contém oleo no anuncio ou não
+        start_cycle = False
 
         if(primeiroCiclo):
             # Volta para a aba dos anúncios
@@ -125,23 +126,39 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
 
         #Colando o código MLB do anuncio e entrando na parte fiscal
         colar_link()
+        um_segundo()
+        pyperclip.copy('?')
+        pyautogui.write(r'/tax-information')
+        pyautogui.hotkey('ctrl', 'v')
+        pyautogui.write(r'type=single')
         pyautogui.hotkey("Enter")
         mlb_copiado = janela.clipboard_get()
         print("Trabalhando com o anúncio MLB{}".format(mlb_copiado))
 
-        time.sleep(10)
+        time.sleep(5)
 
         #Procura o botão para começar a preencher os dados fiscais pela primeira vez
-        pyautogui.click(elementos_loc[0], elementos_loc[1])
+        #pyautogui.click(elementos_loc[0], elementos_loc[1])
 
-        pausa_curta()  # Espera segundos por precaução
+        #pausa_curta()  # Espera segundos por precaução
 
-        pyautogui.click(elementos_loc[2], elementos_loc[3]) # Clica no SKU que é o primeiro campo
+        pyautogui.click(410, 430) # Clica no SKU que é o primeiro campo
+        #pyautogui.click(elementos_loc[8], elementos_loc[9])
         pyautogui.hotkey("ctrl", "a") # Seleciona todo valor do campo
         pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
         text_copiado = janela.clipboard_get() #Pega o valor copiado e coloca em uma váriavel
-        cod_atual = janela.clipboard_get()  # Pega o código MLB que está trabalhando
-        if(text_copiado == mlb_copiado): #Sistema de verificação simples que checa se existe algum valor no código SKU dos dados fiscais, caso haja significa que esse anuncio já foi feito os dados fiscais
+        print("SKU ANUNCIO: {}".format(text_copiado))
+        pausa_curta()
+        if(text_copiado == None or text_copiado == '' or text_copiado == '?'):
+            pyautogui.click(elementos_loc[8], elementos_loc[9])
+            pyautogui.hotkey("ctrl", "a")  # Seleciona todo valor do campo
+            pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
+            text_copiado = janela.clipboard_get()  # Pega o valor copiado e coloca em uma váriavel
+            print("TÍTULO ANUNCIO: {}".format(text_copiado))
+            if (text_copiado == None or text_copiado == '' or text_copiado == '?'):
+                start_cycle = True
+        #cod_atual = janela.clipboard_get()  # Pega o código MLB que está trabalhando
+        if(start_cycle == True): #Sistema de verificação simples que checa se existe algum valor no código SKU dos dados fiscais, caso haja significa que esse anuncio já foi feito os dados fiscais
             #Preenchendo os dados fiscais dos anuncios
 
             #Volta para a aba dos anúncios
@@ -172,6 +189,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pausa_curta() # Espera segundos por precaução
 
             #Colando SKU
+            pyautogui.click(410, 430)  # Clica no SKU que é o primeiro campo
             colar_link()
 
             #Voltando para a aba dos EAN
@@ -202,7 +220,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             um_segundo()  # Espera segundos por precaução
 
             #Copiando nome do produto
-            pyautogui.click(elementos_loc[6], elementos_loc[7], clicks=3)
+            pyautogui.click(elementos_loc[6]+5, elementos_loc[7]+45, clicks=3)
             copiar()
 
             #Sistema de checagem para saber se é um catalisador ou não, caso seja precisa alterar o valor do NCM
@@ -225,7 +243,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             #Indo até o campo nome do produto e colando
             um_segundo()
             pyautogui.click(elementos_loc[8], elementos_loc[9])
-            colar_link()
+            pyautogui.write(titulo)
 
             #Preenche a unidade de medida comercial
             pyautogui.hotkey("Tab")
@@ -233,6 +251,9 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pyautogui.hotkey("Tab")
 
             pyautogui.write("UN")
+            um_segundo()
+            pyautogui.click(837, 860)
+
 
             #Preenchendo Outros Dados
             pyautogui.hotkey("Tab")
@@ -249,6 +270,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pausa_curta()  # Espera segundos por precaução
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Tab")
             um_segundo()
             pyautogui.write(cest) #Preenchendo CEST
             um_segundo()  # Espera segundos por precaução
@@ -256,26 +278,33 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             um_segundo()
             pyautogui.hotkey("Enter")
             #pyautogui.click(elementos_loc[10], elementos_loc[11]) #Abrindo opções de origem
-            um_segundo()  # Espera segundos por precaução
-            pyautogui.hotkey("Down")
-            pyautogui.hotkey("Enter") #Selecionando Nacional
-            pausa_curta()  # Espera segundos por precaução
+            print("Procurar: Nacional")
+            pausa_curta() # Espera segundos por precaução
+            pyautogui.click(422, 599)
+            #pausa_curta()  # Espera segundos por precaução
             um_segundo()
             pyautogui.hotkey("Tab")
+            pyautogui.hotkey("Enter")
+            um_segundo()
+            pyautogui.click(850, 575)
+            #pyautogui.hotkey("Enter")
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS
-            time.sleep(1.25)  # Espera segundos por precaução
+            print("Procurar: ICMS")
+            pausa_curta()
 
             if(conta == "1"): # Se for ScapJá
-                pyautogui.hotkey("Down")
-                pyautogui.hotkey("Down")
-                pyautogui.hotkey("Down")
-                pyautogui.hotkey("Down") #Chegando na opção certa
-                um_segundo()  # Espera segundos por precaução
-                pyautogui.hotkey("Enter")  #Selecionando 500
+                # pyautogui.hotkey("Down")
+                # pyautogui.hotkey("Down")
+                # pyautogui.hotkey("Down")
+                # pyautogui.hotkey("Down") #Chegando na opção certa
+                # um_segundo()  # Espera segundos por precaução
+                # pyautogui.hotkey("Enter")  #Selecionando 500
+                # pyautogui.hotkey("Space")  # Selecionando 500
+                pyautogui.click(491, 962)
                 um_segundo()  # Espera segundos por precaução
             elif(conta == "2"): # Se for SoEscap
-                pyautogui.hotkey("Enter")
+                pyautogui.click(416, 656)
                 um_segundo()
 
             #Preenchendo nas planilhas de anuncios e de EAN
@@ -332,14 +361,19 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             #Salvando os dados fiscais e voltando para a página de anuncios normal
             if(conta == "1"):
                 pyautogui.hotkey("TAB")
+                pyautogui.hotkey("TAB")
+                pyautogui.hotkey("TAB")
                 pyautogui.hotkey("Enter")
             else:
+                pyautogui.hotkey("TAB")
+                pyautogui.hotkey("TAB")
+                pyautogui.hotkey("TAB")
                 pyautogui.hotkey("TAB")
                 pyautogui.hotkey("TAB")
                 pyautogui.hotkey("Enter")
 
             pausa_curta()
-            cod_finalizados.append(cod_atual)
+            #cod_finalizados.append(cod_atual)
             qtd_anuncios_number = qtd_anuncios_number - 1
             print(qtd_anuncios_number)
             #print(qtd_anuncios)

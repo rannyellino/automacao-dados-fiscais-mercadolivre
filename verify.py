@@ -6,7 +6,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('soescap planilha 27-07-23.xlsx')
+    df_base = pd.read_excel('vendas 14-04-24 a 21-04-24.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
@@ -24,6 +24,8 @@ def verificar():
     tipo_peca = []
     linha_peca = []
     fab_peca = []
+    montadoras = []
+    carros = []
 
     #Criando um loop para passar por cada linha da planilha de base de dados
     while i < rows:
@@ -43,14 +45,17 @@ def verificar():
         desc = str(lista[4])
         preco = int(lista[7])
         frete = int(lista[10])
-        frete_gratis = str(lista[12])
+        frete_gratis = str(lista[16])
         titulo = str(lista[3])
+
+        montadora, carro = indetificar_montadora_carro(titulo)
 
         codigos = identificar_codigos(desc) #Chama função que vai identificar quais códigos de peças tem dentro da descrição
         #identificar_acao_zx(desc, zx_cods, px_cods)
 
         #Continua eliminando caracteres a mais que não sejam códigos
         codigos = codigos.replace(":", "")
+        codigos = codigos.replace("1x", "")
         codigos_lista.append(codigos)# Adiciona na lista de códigos a sequencia de códigos do anuncio que o robo identificou
         codigos = codigos.replace(" ", "")
         codigos = codigos.replace("LinhaPesada", "")
@@ -87,9 +92,11 @@ def verificar():
         dif.append(dif_)
         titulos.append(titulo)
         status.append(status_)
+        montadoras.append(montadora)
+        carros.append(carro)
         i = i+1 #Para pular a linha
 
-    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, linha_peca, tipo_peca, fab_peca)
+    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, linha_peca, tipo_peca, fab_peca, montadoras, carros)
 
 def calc_verify(lista_codigos, conta, frete, frete_gratis, titulo):
     i_for = 0
@@ -229,7 +236,7 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis, titulo):
                         print("Valor de Preço*Indice {}".format(custo))
 
                         # Chama função para definir as margens e checar regra de custo
-                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde)
+                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde, tipo)
 
                         # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                         if (linha == "Leve" or linha == "Pesada"):
@@ -357,9 +364,16 @@ def identificar_codigos(desc):
             codigos_len = int(codigos_len)
 
         # Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
-        find_last = codigos.find("Para")
-        if (find_last == None or find_last == -1):
-            find_last = codigos.find("Linha")
+        find_last_words = ["Para", "Linha", "Esse", "Anúncio", "ANÚNCIO", "ANUNCIO", "Anuncio", "Medidas", "Nossos"]
+        i = 0
+        while(codigos.find(find_last_words[i]) == None or codigos.find(find_last_words[i]) == -1):
+            print("find_last_words[i] ",find_last_words[i])
+            print("i = i+1", i)
+            if(i == find_last_words.__len__()-1):
+                break
+            i = i+1
+
+        find_last = codigos.find(find_last_words[i])
 
         find_last = int(find_last)
         print("Find Last:", find_last)
@@ -374,6 +388,38 @@ def identificar_codigos(desc):
     except UnboundLocalError:
         codigos = "00000000"
         return codigos
+
+def indetificar_montadora_carro(titulo):
+    found = False
+    i = 0
+    lista = []
+    titulo = titulo.replace(" ", ",")
+    titulo_array = titulo.split(",")
+
+    df_montadora = pd.read_excel('MONTADORA.xlsx')
+    print(df_montadora)
+
+    while i < titulo_array.__len__():
+        print("Titulo Array: {}".format(titulo_array[i]))
+        linha = df_montadora.loc[lambda df_montadora: df_montadora['Carro'] == titulo_array[i]]
+        print(linha)
+        lista = list(linha.values.flatten())  # Transforma toda a linha do excel em uma ARRAY
+        i = i+1
+        if(lista != []):
+            i = i+100
+
+
+    if(lista == []):
+        linha = df_montadora.loc[lambda df_montadora: df_montadora['Carro'] == 'NAO']
+        print(linha)
+        lista = list(linha.values.flatten())  # Transforma toda a linha do excel em uma ARRAY
+
+    montadora = lista[0]
+    carro = lista[1]
+
+    print("Montadora: {}, Carro: {}".format(montadora, carro))
+
+    return montadora, carro
 
 if __name__ == '__main__':
     verificar()

@@ -11,12 +11,12 @@ from selenium.common.exceptions import NoSuchElementException, ElementClickInter
 def incluir_promo():
     user = "Administrator"  # Setando usuario
     button_xpath = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div[3]/div[1]/div[1]/div[4]/button' #Botão Participar
-    button_xpath2 = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div[3]/div[1]/div[2]/div[4]/button'
+    button_xpath2 = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[5]/div/div/div[3]/div[1]/div[2]/div[4]/button'
     button_xpath3 = '/html/body/main/div/div/div[2]/div/div[1]/div/div[1]/div[6]/div/div/div/div/div[4]/div[1]/div[3]/div/div[3]/button'
     #autoparts = '//*[@id="app-root-wrapper"]/div[1]/div/div[1]/div[5]/div/div/div/div/div[3]/div/div[1]/span'
     #ofertas = '//*[@id="app-root-wrapper"]/div[1]/div/div[1]/div[5]/div/div/div/div/div[3]/div/div[2]/span'
-    _url = "https://www.mercadolivre.com.br/anuncios/lista/promos?filters=seller_campaign_offer-c-mlb961381&page=1&search="
-    _url2 = "&task=c-mlb961381"
+    _url = "https://www.mercadolivre.com.br/anuncios/lista/promos?filters=meli_campaign_offer-p-mlb14093086&page=1&search="
+    _url2 = "&task=p-mlb14093086"
     em_processo = True
     cods_mlbs = []
     status_list = []
@@ -24,7 +24,7 @@ def incluir_promo():
     cods_alterados = []
     have_autoparts = False
 
-    df_base = pd.read_excel('promo catalisadores 20% scapja 08-04-24.xlsx')
+    df_base = pd.read_excel('fiz-merda-2.xlsx')
     print(df_base)
     rows = len(df_base.index)
     i = 0
@@ -117,17 +117,23 @@ def incluir_promo():
                 except (StaleElementReferenceException, NoSuchElementException) as e:
                     status = 'Error'
                 pausa_curta()
-                button_click_x = '/html/body/div[6]/div/div/div[2]/div[3]/button[1]'
+                button_click_x = '/html/body/div[7]/div/div/div[2]/div[3]/button[1]'
                 try:
                     button_click = chrome.find_element(By.XPATH, button_click_x)
-                    button_click.click()
-                    status = 'Okay'
+                    button_text = button_click.text
+                    if(button_text == "Deixar de participar"):
+                        button_click = chrome.find_element(By.XPATH, button_click_x)
+                        button_click.click()
+                        status = 'Okay'
                 except NoSuchElementException:
                     time.sleep(1.25)
                     try:
                         button_click = chrome.find_element(By.XPATH, button_click_x)
-                        button_click.click()
-                        status = 'Okay'
+                        button_text = button_click.text
+                        if (button_text == "Deixar de participar"):
+                            button_click = chrome.find_element(By.XPATH, button_click_x)
+                            button_click.click()
+                            status = 'Okay'
                     except NoSuchElementException:
                         status = 'Erro'
                 except ElementClickInterceptedException:

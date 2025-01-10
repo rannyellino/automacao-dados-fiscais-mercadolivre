@@ -9,8 +9,11 @@ import pandas as pd
 import calc
 import emoji
 import requests
+import norte_nordeste
 from datetime import datetime
 import googlesheets as gs
+import verify_list
+from erros import err
 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -22,8 +25,63 @@ class MyClient(discord.Client):
     async def on_message(self, message):
         print(f'Messagem de {message.author}: {message.content}')
 
+        if ('?create' in message.content and str(message.channel) == 'create'):
+            msg = str(message.content)
+
+            # Limpando o conteúdo da msg para pegarmos apenas os códigos e a conta alvo
+            find_cods = msg.find('cods:')
+            find_conta = msg.find('conta:')
+
+            codigos = msg[find_cods + 5: find_conta - 1]
+            conta = msg[find_conta + 7::]
+            codigos = codigos.strip()
+            conta = conta.strip()
+
+            if (codigos == None or codigos == '' or conta == None or conta == ''):
+                await err(message, 'Dados')
+
+            # Enviando para validação
+
+
         if message.content == '?inutil':
             await message.channel.send(f'{message.author.mention} o inútil do servidor é o Guilherme')
+
+        if '?verify-list' in message.content:
+            #Limpando a mensagem para ficar apenas o nome de quem enviou o arquivo
+            message_str = str(message.content)
+            message_str = message_str.replace("?verify-list", "")
+            message_str = message_str.replace(" ", "")
+            name = message_str
+            attachments = message.attachments
+            print(attachments)
+            await message.channel.send(f'Verificando arquivo enviado')
+            data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+            nome_arquivo = name + ' ' + str(data_hora) + ".txt"
+            await message.channel.send(f'Salvando arquivo')
+            await message.attachments[0].save(nome_arquivo)  # saves the file
+            time.sleep(10)
+            await message.channel.send(f'Arquivo salvo, {nome_arquivo}')
+            await message.channel.send(f'Verificando')
+            file_send_name = call_verify_list(nome_arquivo)
+            await message.channel.send(f'Preparando arquivo')
+            file = discord.File(file_send_name)
+            await message.channel.send(file=file,
+                                       content=f'{message.author.mention} terminei de verificar sua lista, por favor baixe o arquivo de correção para verificar se há erros')
+
+        if '?norte-nordeste' in message.content:
+            attachments = message.attachments
+            print(attachments)
+            await message.channel.send(f'Verificando arquivo enviado')
+            data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+            nome_arquivo = str(data_hora) + ".xlsx"
+            await message.channel.send(f'Salvando arquivo')
+            message.attachments[0].save(nome_arquivo)  # saves the file
+            await message.channel.send(f'Começando a contas as vendas')
+            file_send_name, count = call_norte_nordeste(nome_arquivo)
+            await message.channel.send(f'Preparando arquivo')
+            file = discord.File(file_send_name)
+            await message.channel.send(file=file,
+                                       content=f'{message.author.mention} contamos {count} vendas para os estados do NORTE e NORDESTE')
 
         if '?verify' in message.content:
             #Achando o link e código MLB
@@ -85,6 +143,24 @@ class MyClient(discord.Client):
             #                            +"Peças: {}".format(lista_codigos)+f'{os.linesep}'+"Preço do Anuncio: R${}".format(preco_anuncio)+f'{os.linesep}'+
             #                            "Preço Correto: R${}".format(preco_correto)+f'{os.linesep}{os.linesep}'+"Diferença de Preço: {}%".format(diff)+f'{os.linesep}{os.linesep}'+
             #                           emoji_price)
+
+
+
+def call_verify_list(nome_arquivo):
+    try:
+        file_send_name = verify_list.check_list(nome_arquivo)
+    except FileNotFoundError:
+        call_verify_list(nome_arquivo)
+
+    return file_send_name
+
+def call_norte_nordeste(nome_arquivo):
+    try:
+        file_send_name, count = norte_nordeste.check_sells(nome_arquivo)
+    except FileNotFoundError:
+        call_norte_nordeste(nome_arquivo)
+
+    return file_send_name, count
 
 def calc_parts(lista_codigos, chrome, account):
     print("Lista Códigos: {}\n Conta: {}\n\n".format(lista_codigos, account))
@@ -486,8 +562,6 @@ def identify_parts(chrome):
     except NoSuchElementException:
         print("Não conseguiu achar descrição")
 
-
-
 def pausa_longa():
     time.sleep(4.5)
 
@@ -496,7 +570,6 @@ def pausa_curta():
 
 def one_sec():
     time.sleep(1)
-
 
 intents = discord.Intents.default()
 intents.message_content = True

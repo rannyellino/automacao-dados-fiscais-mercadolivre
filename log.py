@@ -44,6 +44,17 @@ def log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigo
     dataframe.to_excel("LOG/"+nome_arquivo)
     print("LOG/"+nome_arquivo)
 
+def log_excel2(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos, montadoras, carros, custos):
+    data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
+    nome_arquivo = str(data_hora) + ".xlsx"
+    df = {'contas': contas, 'mlbs': mlbs, 'Título': titulos, 'Peças': codigos_lista,
+          'Qtd Peças': total_pecas,'Montadora': montadoras, 'Carros': carros, 'Preço Antigo': precos_antigos, 'Preços Corretos': precos_corretos,
+          'Diferença': dif, "Status": status, "Custos": custos}
+    dataframe = pd.DataFrame(df)
+    print(dataframe)
+    dataframe.to_excel("LOG/"+nome_arquivo)
+    print("LOG/"+nome_arquivo)
+
 def log_tray(sku, titulo, cods, total_peca, tipo_peca, linha_peca, fab_peca):
     data_hora = datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # Pega a data e hora atual e já formata
     nome_arquivo = "Tray Linha Leve" + str(data_hora) + ".xlsx"

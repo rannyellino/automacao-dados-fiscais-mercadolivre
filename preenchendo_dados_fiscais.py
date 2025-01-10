@@ -16,6 +16,7 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
     # Aba de Anuncios do MercadoLivre
     anuncios = r"" #É o mesmo link indepedente da conta
     dados_fiscais = r"https://myaccount.mercadolivre.com.br/fiscal-information/item/MLB" #link para entrar na parte fiscal de um anúncio
+    dados_fiscais2 = r"/tax-information?type=single"
     primeiroCiclo = True #Checar o primeiro ciclo
     em_processo = True #saber se ainda está dentro do laço para preencher os dados fiscais
     cod_finalizados = [] #Lista para colocar os códigos finalizados
@@ -32,20 +33,19 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
     pausa_longa() #Espera segundos por precaução
 
     # Abrindo cada planilha em uma nova ABA
-    abrir_nova_aba()
-    pyperclip.copy(link_planilha_anuncios)
-    colar_link()
-    pyautogui.hotkey("enter") #Entrou no link da planilha de anuncios
+    chrome.execute_script(f"window.open('about:blank','anuncios');")
+    chrome.switch_to.window(f'anuncios')
+    chrome.get(link_planilha_anuncios)
 
     abrir_nova_aba()
     pyperclip.copy(link_planilha_EAN)
     colar_link()
     pyautogui.hotkey("enter") #Entrou no link da planilha de EAN
 
-    abrir_nova_aba()
-    pyperclip.copy(anuncios)
-    colar_link()
-    pyautogui.hotkey("enter") #Entrou no link dos anuncios dentro do ML
+    # abrir_nova_aba()
+    # pyperclip.copy(anuncios)
+    # colar_link()
+    # pyautogui.hotkey("enter") #Entrou no link dos anuncios dentro do ML
 
     print("Abriu todas as abas que precisa")
     print("Em processo {}".format(em_processo))
@@ -57,12 +57,15 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
         checa_catalisador = 0 #Variavel dedicada para o sistema de verificação se contém catalisador no anuncio ou não
                               #Sempre ela vai iniciar com o valor de 0 em cada ciclo
         checa_oleo = 0 #Variavel dedicada para o sistema de verificação se contém oleo no anuncio ou não
+        checa_bateria = 0
         start_cycle = False
 
         if(primeiroCiclo):
             # Volta para a aba dos anúncios
             mudar_aba_atras()
-            mudar_aba_atras()
+            #--
+            #mudar_aba_atras()
+            #--
 
             pausa_longa() #Espera segundos por precaução
 
@@ -83,29 +86,36 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
 
             pausa_curta() #Espera segundos por precaução
 
-            mudar_aba_frente()  # Chegando na aba do MercadoLivre
-
-            pausa_curta()
+            #--
+            # mudar_aba_frente()  # Chegando na aba do MercadoLivre
+            #
+            # pausa_curta()
 
             # Pesquisando anuncio
-            pyautogui.click(x=259, y=55)
-            pyperclip.copy(dados_fiscais)
-            colar_link()
+            # pyautogui.click(x=259, y=55)
+            # pyperclip.copy(dados_fiscais)
+            # colar_link()
+            #--
 
             #Volta para a aba dos anúncios
             mudar_aba_atras()
-            mudar_aba_atras()
+            #--
+            #mudar_aba_atras()
+            #--
 
             pausa_curta()
         else:
             #Alterando o link da url para o link dos dados fiscais onde só irá faltar colocar o código MLB
-            pyautogui.click(x=259, y=55)
-            pyperclip.copy(dados_fiscais)
-            colar_link()
-
-            # Volta para a aba dos anúncios
-            mudar_aba_atras()
-            mudar_aba_atras()
+            #--
+            # pyautogui.click(x=259, y=55)
+            # pyperclip.copy(dados_fiscais)
+            # colar_link()
+            #
+            # # Volta para a aba dos anúncios
+            # mudar_aba_atras()
+            #--
+            #mudar_aba_atras()
+            pass
 
         #Pegar código do anuncio do MercadoLivre
         if(primeiroCiclo):
@@ -119,21 +129,29 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             um_segundo()
             copiar()
 
-        mudar_aba_frente()
-        mudar_aba_frente() #Chegando na aba do MercadoLivre
-
-        pausa_curta()
-
-        #Colando o código MLB do anuncio e entrando na parte fiscal
-        colar_link()
-        um_segundo()
-        pyperclip.copy('?')
-        pyautogui.write(r'/tax-information')
-        pyautogui.hotkey('ctrl', 'v')
-        pyautogui.write(r'type=single')
-        pyautogui.hotkey("Enter")
+        #--
+        # mudar_aba_frente()
+        # mudar_aba_frente() #Chegando na aba do MercadoLivre
+        #
+        # pausa_curta()
+        #
+        # #Colando o código MLB do anuncio e entrando na parte fiscal
+        # colar_link()
+        # um_segundo()
+        # pyperclip.copy('?')
+        # pyautogui.write(r'/tax-information')
+        # pyautogui.hotkey('ctrl', 'v')
+        # pyautogui.write(r'type=single')
+        # pyautogui.hotkey("Enter")
         mlb_copiado = janela.clipboard_get()
-        print("Trabalhando com o anúncio MLB{}".format(mlb_copiado))
+        # print("Trabalhando com o anúncio MLB{}".format(mlb_copiado))
+        #--
+
+        __url = dados_fiscais + mlb_copiado + dados_fiscais2
+
+        chrome.execute_script(f"window.open('about:blank','{qtd_anuncios_number}');")
+        chrome.switch_to.window(f'{qtd_anuncios_number}')
+        chrome.get(__url)
 
         time.sleep(5)
 
@@ -142,21 +160,38 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
 
         #pausa_curta()  # Espera segundos por precaução
 
-        pyautogui.click(410, 430) # Clica no SKU que é o primeiro campo
-        #pyautogui.click(elementos_loc[8], elementos_loc[9])
-        pyautogui.hotkey("ctrl", "a") # Seleciona todo valor do campo
-        pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
-        text_copiado = janela.clipboard_get() #Pega o valor copiado e coloca em uma váriavel
-        print("SKU ANUNCIO: {}".format(text_copiado))
-        pausa_curta()
-        if(text_copiado == None or text_copiado == '' or text_copiado == '?'):
-            pyautogui.click(elementos_loc[8], elementos_loc[9])
-            pyautogui.hotkey("ctrl", "a")  # Seleciona todo valor do campo
-            pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
-            text_copiado = janela.clipboard_get()  # Pega o valor copiado e coloca em uma váriavel
-            print("TÍTULO ANUNCIO: {}".format(text_copiado))
-            if (text_copiado == None or text_copiado == '' or text_copiado == '?'):
-                start_cycle = True
+        print("Verificando campo SKU")
+        xpath_sku = "/html/body/main/section/section/section/div[1]/form/div[1]/div[1]/div[2]/div/div[1]/input"
+        try:
+            sku = chrome.find_element(By.XPATH, xpath_sku).get_attribute("value")
+            print("Achou o SKU: ", sku)
+            pausa_curta()
+
+            if(sku == None or sku == '' or sku == '?'):
+                #--
+                # pyautogui.click(elementos_loc[8], elementos_loc[9])
+                # print("LOC 9", elementos_loc[9])
+                # pyautogui.hotkey("ctrl", "a")  # Seleciona todo valor do campo
+                # pyautogui.hotkey("ctrl", "c")  # Copia o que tiver no campo SKU
+                # text_copiado = janela.clipboard_get()  # Pega o valor copiado e coloca em uma váriavel
+                # print("TÍTULO ANUNCIO: {}".format(text_copiado))
+                #--
+                print("Verificando campo TÍTULO")
+                xpath_titulo = "/html/body/main/section/section/section/div[1]/form/div[4]/div/div[1]/input"
+                titulo = chrome.find_element(By.XPATH, xpath_titulo).get_attribute("value")
+                print("Achou o Título: ", titulo)
+                if (titulo == None or titulo == '' or titulo == '?'):
+                    start_cycle = True
+
+            if(start_cycle != True):
+                print("Checando se tem todos os dados menos o EAN")
+                xpath_ean = "/html/body/main/section/section/section/div[1]/form/div[2]/div[1]/div[2]/div/div[1]/input"
+                ean = chrome.find_element(By.XPATH, xpath_ean).get_attribute("value")
+                print("EAN Preenchido: ", ean)
+                preencher_ean(chrome, primeiroCiclo, xpath_ean, janela, mlb_copiado) if ean == "Não aplicável" else colocando_feito(chrome, janela, qtd_anuncios_number)
+        except NoSuchElementException:
+            pass
+
         #cod_atual = janela.clipboard_get()  # Pega o código MLB que está trabalhando
         if(start_cycle == True): #Sistema de verificação simples que checa se existe algum valor no código SKU dos dados fiscais, caso haja significa que esse anuncio já foi feito os dados fiscais
             #Preenchendo os dados fiscais dos anuncios
@@ -221,6 +256,9 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
 
             #Copiando nome do produto
             pyautogui.click(elementos_loc[6]+5, elementos_loc[7]+45, clicks=3)
+            print("Copiando nome do produto")
+            print("Loc 6", elementos_loc[6], "Loc 7", elementos_loc[7])
+            pausa_longa()
             copiar()
 
             #Sistema de checagem para saber se é um catalisador ou não, caso seja precisa alterar o valor do NCM
@@ -235,6 +273,9 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
                     print("É catalisador")
                 elif (texto == "oleo" or texto == "óleo"):
                     checa_oleo = 1
+                    print("É oleo")
+                elif (texto == "bateria"):
+                    checa_bateria = 1
                     print("É oleo")
                 else:
                     print("não é catalisador nem oleo")
@@ -251,8 +292,8 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pyautogui.hotkey("Tab")
 
             pyautogui.write("UN")
-            um_segundo()
-            pyautogui.click(837, 860)
+            pausa_curta()
+            pyautogui.click(837, 810)
 
 
             #Preenchendo Outros Dados
@@ -263,6 +304,9 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             elif(checa_oleo == 1):
                 ncm = "27101932"
                 cest = "0600700"
+            elif(checa_bateria == 1):
+                ncm = "85071010"
+                cest = "0105301"
             else:
                 ncm = "87089200"
                 cest = "0107500"
@@ -280,13 +324,17 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             #pyautogui.click(elementos_loc[10], elementos_loc[11]) #Abrindo opções de origem
             print("Procurar: Nacional")
             pausa_curta() # Espera segundos por precaução
-            pyautogui.click(422, 599)
-            #pausa_curta()  # Espera segundos por precaução
+            #pyautogui.click(422, 599)
+            pyautogui.click(405, 981)
+            pausa_curta()  # Espera segundos por precaução
             um_segundo()
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Enter")
             um_segundo()
-            pyautogui.click(850, 575)
+            #pyautogui.click(850, 575)
+            pyautogui.click(831, 935)
+            um_segundo()
+            pyautogui.scroll(3000)
             #pyautogui.hotkey("Enter")
             pyautogui.hotkey("Tab")
             pyautogui.hotkey("Enter") #Abrindo CSOSN do ICMS
@@ -294,17 +342,16 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pausa_curta()
 
             if(conta == "1"): # Se for ScapJá
-                # pyautogui.hotkey("Down")
-                # pyautogui.hotkey("Down")
-                # pyautogui.hotkey("Down")
-                # pyautogui.hotkey("Down") #Chegando na opção certa
-                # um_segundo()  # Espera segundos por precaução
-                # pyautogui.hotkey("Enter")  #Selecionando 500
-                # pyautogui.hotkey("Space")  # Selecionando 500
-                pyautogui.click(491, 962)
+                pyautogui.hotkey("Tab")
+                #pyautogui.click(397, 560)
+                um_segundo()
+                #pausa_curta()
+                pyautogui.click(420, 790)
                 um_segundo()  # Espera segundos por precaução
+                pausa_curta()
             elif(conta == "2"): # Se for SoEscap
-                pyautogui.click(416, 656)
+                #pyautogui.click(416, 656)
+                pyautogui.click(397, 560)
                 um_segundo()
 
             #Preenchendo nas planilhas de anuncios e de EAN
@@ -331,14 +378,6 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             #Cola o código do anúncio ao EAN referente
             colar_link() #Cola o código do anúncio que editou o EAN
             um_segundo()
-            #pyautogui.click(x=710, y=233)
-            #um_segundo()
-            if(conta == "1"): #Se for ScapJá
-               #pyautogui.click(x=801, y=422) #Pinta de verde para indicar que é a conta SCAPJÁ
-                um_segundo()
-            elif(conta == "2"):
-                #pyautogui.click(x=783, y=421)  # Pinta de amarelo para indicar que é a conta SoEscap
-                um_segundo()
 
             #Vai até a aba de ANÚNCIOS
             mudar_aba_atras()
@@ -359,18 +398,21 @@ def preenchendo(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anuncios
             pausa_curta()
 
             #Salvando os dados fiscais e voltando para a página de anuncios normal
-            if(conta == "1"):
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("Enter")
-            else:
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("TAB")
-                pyautogui.hotkey("Enter")
+            #--
+            # if(conta == "1"):
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("Enter")
+            # else:
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("TAB")
+            #     pyautogui.hotkey("Enter")
+            #--
+            salvando(chrome)
 
             pausa_curta()
             #cod_finalizados.append(cod_atual)
@@ -566,6 +608,80 @@ def preenchendo_tray(link_planilha_anuncios, link_planilha_EAN, linha_coluna_anu
             finalizado.grid(column=0, row=17)
             log.criando_log(cod_finalizados, cod_erros)
             em_processo = False
+
+def preencher_ean(chrome, primeiroCiclo, xpath_ean, janela, mlb_copiado):
+    print("Preenchendo somente o EAN")
+    pausa_curta()
+
+    mudar_aba_frente()
+    pausa_curta()
+
+    # Copiando EAN
+    if (primeiroCiclo):
+        pyautogui.hotkey("left")  # Chegando até o EAN
+        copiar()
+        pyautogui.hotkey("right")  # Voltando para preencher o código do anuncio depois
+    else:
+        pyautogui.hotkey("down")
+        pyautogui.hotkey("left")  # Chegando até o EAN
+        copiar()
+        pyautogui.hotkey("right")  # Voltando para preencher o código do anuncio depois
+
+    text_copiado = janela.clipboard_get()
+
+    mudar_aba_atras()
+    pausa_curta()
+
+    chrome.find_element(By.XPATH, xpath_ean).click()
+    um_segundo()
+
+    pyautogui.write(text_copiado)
+    um_segundo()
+
+    mudar_aba_atras()
+    um_segundo()
+
+    pyautogui.hotkey("right")
+    um_segundo()
+    pyautogui.write("FEITO")
+    um_segundo()
+    pyautogui.hotkey("left")
+
+    mudar_aba_frente()
+    mudar_aba_frente()
+    um_segundo()
+
+    pyautogui.write(mlb_copiado)
+
+    salvando(chrome)
+
+def colocando_feito(chrome, janela, qtd_anuncios_number):
+    print("Já tem EAN")
+    mudar_aba_atras()
+    um_segundo()
+
+    pyautogui.hotkey("right")
+    copiar()
+
+    text_copiado = janela.clipboard_get()
+    print("Já preencheu FEITO") if text_copiado == "FEITO" else print("Preenchendo FEITO")
+
+    um_segundo()
+    pyautogui.write("FEITO")
+    um_segundo()
+    pyautogui.hotkey("left")
+    um_segundo()
+
+    chrome.switch_to.window(f'{qtd_anuncios_number}')
+    chrome.close()
+    chrome.switch_to.window(f'anuncios')
+
+def salvando(chrome):
+    xpath_save_button = "/html/body/main/section/section/section/div[2]/button"
+    chrome.find_element(By.XPATH, xpath_save_button).click()
+    pausa_curta()
+    chrome.close()
+    chrome.switch_to.window(f'anuncios')
 
 def um_segundo():
     time.sleep(1)

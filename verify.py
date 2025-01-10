@@ -6,7 +6,7 @@ import log
 
 def verificar():
     #Lendo a tabela
-    df_base = pd.read_excel('vendas 14-04-24 a 21-04-24.xlsx')
+    df_base = pd.read_excel('DESCONTAÇO 2025 JANEIRO.xlsx')
     print(df_base)
     rows = len(df_base.index) #Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0 #Para o while que vai rodar a leitura de cada linha da base de dados
@@ -236,7 +236,7 @@ def calc_verify(lista_codigos, conta, frete, frete_gratis, titulo):
                         print("Valor de Preço*Indice {}".format(custo))
 
                         # Chama função para definir as margens e checar regra de custo
-                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde, tipo)
+                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos, have_brinde, tipo, i)
 
                         # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                         if (linha == "Leve" or linha == "Pesada"):
@@ -364,7 +364,7 @@ def identificar_codigos(desc):
             codigos_len = int(codigos_len)
 
         # Agora precisamos achar onde vai começar novamente a exclusão da string que vai ser pelas duas palavras "Para" ou "Linha" o que sobrar serão os códigos das peças mais alguns caracteres
-        find_last_words = ["Para", "Linha", "Esse", "Anúncio", "ANÚNCIO", "ANUNCIO", "Anuncio", "Medidas", "Nossos"]
+        find_last_words = ["Para", "Características","Dimensões","Linha", "Esse", "Anúncio", "ANÚNCIO", "ANUNCIO", "Anuncio", "Medidas", "Nossos"]
         i = 0
         while(codigos.find(find_last_words[i]) == None or codigos.find(find_last_words[i]) == -1):
             print("find_last_words[i] ",find_last_words[i])

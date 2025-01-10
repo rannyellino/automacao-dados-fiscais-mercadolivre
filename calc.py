@@ -7,7 +7,6 @@ import googlesheets as gs
 
 import interface
 
-
 def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, qtd_10, cod_1, cod_2, cod_3, cod_4, cod_5, cod_6, cod_7, cod_8, cod_9, cod_10, custo_frete):
     #Agrupando as quantidades e codigos dos anuncios
     qtds = [qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, qtd_10]
@@ -136,7 +135,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
                         print("Valor de Preço*Indice {}".format(custo))
 
                         #Chama função para definir as margens e checar regra de custo
-                        custo, margem_scapja, margem_soescap = margem(custo, fab, linha, cods, have_brinde, tipo)
+                        custo, margem_scapja, margem_soescap = margem(custo, fab, linha, cods, have_brinde, tipo, i)
 
                         #Calcula o valor de venda final para cada canal mas sem o MercadoEnvios
                         if(linha == "Leve" or linha == "Pesada"):
@@ -199,7 +198,7 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
                 valores_vendas.append(0)
         if(have_consulte == True or cods == []):
             valores_vendas.append(0)
-            custo_frete = 0
+            #custo_frete = 0
 
         #Soma os valores de cada peça pra ter o valor de venda final
         print("Custo frete", custo_frete)
@@ -226,10 +225,15 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
         venda_shops = venda_shops + custo_frete
         print(venda_shops)
 
+        scapja_sem_custo_frete = venda_scapja - custo_frete
+        venda_shopee = scapja_sem_custo_frete + (scapja_sem_custo_frete * 0.04) + 4
+        venda_shopee = venda_shopee + (venda_shopee * 1)
+
         venda_scapja = round(venda_scapja)
         venda_soescap = round(venda_soescap)
         venda_tray = round(venda_tray)
         venda_shops = round(venda_shops)
+        venda_shopee = round(venda_shopee)
 
         print("Valor de Venda ScapJá: {}".format(venda_scapja))
         print("Valor de Venda Shops: {}".format(venda_shops))
@@ -255,8 +259,9 @@ def calc(janela, qtd_1, qtd_2, qtd_3, qtd_4, qtd_5, qtd_6, qtd_7, qtd_8, qtd_9, 
                        "Valor de venda na Shops: {}\n" \
                        "Valor de venda na SoEscap: {}\n" \
                        "Valor de venda na Tray: {}\n" \
-                       "\n".format(venda_scapja, venda_shops, venda_soescap, venda_tray)
-        venda_label = Text(janela, height=4, width=35, borderwidth=0, font=interface.font_default())
+                       "Valor de venda na Shopee: {}\n" \
+                       "\n".format(venda_scapja, venda_shops, venda_soescap, venda_tray, venda_shopee)
+        venda_label = Text(janela, height=5, width=35, borderwidth=0, font=interface.font_default())
         venda_label.insert(1.0, string_venda)
         venda_label.tag_configure("tag_name", justify="center")
         venda_label.tag_add("tag_name", "1.0", "end")
@@ -396,17 +401,19 @@ def indice_fabricante(fab, linha, tipo):
 
     #Mastra
     if(fab == fabricantes[0] and linha == "Leve" and tipo == "Escap"):
-        indice = 0.4723
+        indice = 0.4959
     elif(fab == fabricantes[0] and linha == "Pesada" and tipo == "Escap"):
-        indice = 0.5750
+        indice = 0.6038
     elif(fab == fabricantes[0] and linha == "Leve" and tipo == "Catalisador"):
-        indice = 0.3799
+        # ATUAL = indice = 0.3989 + 12% = 0.4467
+        indice = 0.3989
     elif (fab == fabricantes[0] and linha == "Leve" and tipo == "Flexivel"):
         indice = 1
 
     #Pioneiro
     if (fab == fabricantes[1]):
-        indice = 0.1640
+        #ATUAL = indice = 0.1722 + 12% = 0.1928
+        indice = 0.1722
     elif(fab == fabricantes[1] and tipo == "Flexivel"):
         indice = 1
 
@@ -423,7 +430,7 @@ def indice_fabricante(fab, linha, tipo):
 
     #Alpha
     if(fab == fabricantes[2]):
-        indice = 0.4739
+        indice = 0.4976
 
     #Amam
     if(fab == fabricantes[3]):
@@ -440,17 +447,19 @@ def indice_fabricante(fab, linha, tipo):
     if(indice == None or indice == 0):
         indice = 1
 
-    # J.L.F
+    # PREÇO DE CUSTO
     if (fab == "ZZ"):
             indice = 1
 
     return indice
 
-def margem(custo, fab, linha, cods, have_brinde, tipo):
+def margem(custo, fab, linha, cods, have_brinde, tipo, i):
     #Função para definir margem e também definir as regras para quando tivermos que usar o custo dele mesmo vezes 2
     #Quando o custo de uma peça é inferior ou igual a R$65,00 ele precisa ser calculado X2 ignorando a margem normal de 175% e 165%
+    effa = ['7800-0', '7801-0', '7802-0']
 
-    print("Cods: {}".format(cods))
+    print("Cods Margem: {}".format(cods))
+    print(i)
     qtd_cods = cods.__len__() #Checa a quantidade de códigos, pois se for acima de 1 não pode fazer o custo x2
     print("Qtds Cods:", qtd_cods)
 
@@ -472,15 +481,27 @@ def margem(custo, fab, linha, cods, have_brinde, tipo):
         custo = custo * 2
         margem_scapja = 1
         margem_soescap = 1
+    elif(fab == "Mastra" and tipo == "Tubo"):
+        custo = custo * 2
+        margem_scapja = 1
+        margem_soescap = 1
+    elif(fab == "Pioneiro" and tipo == "Tubo"):
+        custo = custo * 2
+        margem_scapja = 1
+        margem_soescap = 1
     elif(fab == "Mastra" and linha == "Pesada"):
-        margem_scapja = 2.15
-        margem_soescap = 2.04
+        margem_scapja = 2.21
+        margem_soescap = 2.10
     elif(tipo == "Catalisador"):
         margem_scapja = 1.75
         margem_soescap = 1.65
     else:
-        margem_scapja = 1.81
-        margem_soescap = 1.68
+        margem_scapja = 1.87
+        margem_soescap = 1.73
+
+    if str(i) in effa:
+        margem_scapja = 2.75
+        margem_soescap = 2.5
 
     return custo, margem_scapja, margem_soescap
 
@@ -492,8 +513,8 @@ def check_fix(cods, linha):
     linhas = []
 
     # Pegando a planilha com os códigos das peças e preços
-    df_base = pd.read_excel('Peças-Preços.xlsx')
-    #df_base = gs.main()
+    #df_base = pd.read_excel('Peças-Preços.xlsx')
+    df_base = gs.main()
 
     for i in cods:
         print("Código Check Fix: {}".format(i))
@@ -511,18 +532,23 @@ def check_fix(cods, linha):
                     lista = list(
                         filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
                     print("Lista = [] 1 ", lista, " I: ", i)
+                    linha = lista[1]
+                    linhas.append(linha)
                 elif (lista == []):
                     filtro = df_base.loc[df_base["Cod Peça"] == str(i)]  # Procura a linha com o código da peça
                     lista = list(
                         filtro.values.flatten())  # Transforma a linha da planilha em uma lista para termos os valores
                     print("Lista = [] 2 ", lista, " I: ", i)
+                    linha = lista[1]
+                    linhas.append(linha)
                 elif (lista == []):
                     print("Não achou a peça na base de dados")
                     continue
                 else:
+                    print("ELSE LINHA LISTA")
                     linha = lista[1]
                     linhas.append(linha)
-            except ValueError:
+            except (ValueError, IndexError) as e:
                 print("Não achou a peça na base de dados")
                 continue
 
@@ -533,9 +559,13 @@ def check_fix(cods, linha):
         try:
             print(cods)
             print("Z: {}, Parts: {}".format(z, parts))
+            print("LINHA: ", linha)
+            print("LINHAS: ", linhas)
+            print("LINHAS Z:", linhas[z])
             if(linhas[z] == "Leve"):
                 parts = parts+1
             z = z+1
+            print("PARTS: ", parts, "Z: ", z)
         except IndexError:
             print("Except IndexError")
 

@@ -4,11 +4,11 @@ import navegador
 
 def getMLB():
     user = "Administrator" #Setando usuário
-    mlb_id = "sc-list-description__id" #Classe do html que contém o ID
+    mlb_id = "sc-list-item-row-description__id" #Classe do html que contém o ID
     cods_mlbs = []
     em_processo = True
-    numPageActual = 136
-    max_pages = 136
+    numPageActual = 18
+    max_pages = 18
     primeiroCiclo = True
 
 
@@ -18,7 +18,7 @@ def getMLB():
 
     while(em_processo == True):
         if(numPageActual <= max_pages):
-            _url = "https://www.mercadolivre.com.br/anuncios/lista/promos?filters=meli_campaign_offer-p-mlb13947230&page=" + str(numPageActual) + "&task=p-mlb13947230"
+            _url = "https://www.mercadolivre.com.br/anuncios/lista?filters=OMNI_ACTIVE|OMNI_INACTIVE|CHANNEL_NO_PROXIMITY_AND_NO_MP_MERCHANTS|USED&page=" + str(numPageActual) + "&sort=DEFAULT"
             if (primeiroCiclo == True):
                 chrome.execute_script("window.open('about:blank','blank');")
                 chrome.switch_to.window('blank')
@@ -45,7 +45,7 @@ def getMLB():
             primeiroCiclo = False
             print("Cods MLBS: {}".format(cods_mlbs.__len__()))
         else:
-            with open("CODS MLBS AUTOPARTS 01-04-24 - SoEscap-2.txt",
+            with open("CODS MLBS USADOS 17-10-24 - SJ-2.txt",
                       "w") as arquivo:  # Cria o arquivo TXT com o nome certo e começa a escrever em cada linha os códigos que ele finalizou o processo
                 for value in cods_mlbs:
                     arquivo.write(str(value) + "\n")

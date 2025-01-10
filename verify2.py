@@ -7,7 +7,7 @@ import googlesheets as gs
 
 def verificar2():
     # Lendo a tabela
-    df_base = pd.read_excel('vendas 14-04-24 a 21-04-24.xlsx')
+    df_base = pd.read_excel('vendas 09-12-24 a 15-12-24.xlsx')
     print(df_base)
     rows = len(df_base.index)  # Pega a quantidade de linhas que tem na base de dados para usar como referencia no while
     i = 0  # Para o while que vai rodar a leitura de cada linha da base de dados
@@ -103,13 +103,14 @@ def verificar2():
     print("Contas: {}, MLBS: {}, Preço_Old: {}, Preço Correto: {}, Diff: {}, Status: {}, Codigo_Lista: {}, Total_Peças: {}, Titulos: {}, Montadoras: {}, Carros: {}, Custos: {}".format(
         contas.__len__(), mlbs.__len__(), precos_antigos.__len__(), precos_corretos.__len__(),
           dif.__len__(), status.__len__(), codigos_lista.__len__(), total_pecas.__len__(), titulos.__len__(), montadoras.__len__(), carros.__len__(), custos.__len__()))
-    log.log_excel(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos,
+    log.log_excel2(contas, mlbs, precos_antigos, precos_corretos, dif, status, codigos_lista, total_pecas, titulos,
                  montadoras, carros, custos)
 
 def calc_verify2(lista_codigos, conta, frete, frete_gratis):
     # Pegando a planilha com os códigos das peças e preços
     i_for = 0
-    df_base = pd.read_excel('custos-estoque.xlsx')
+    df_base = pd.read_excel('custos-estoque-2.xlsx')
+    #df_base = pd.read_excel('Peças-Preços.xlsx')
     qtds = []
     fabs = []
     fixacoes = []
@@ -201,7 +202,7 @@ def calc_verify2(lista_codigos, conta, frete, frete_gratis):
                         custos_list.append(int(custo))
 
                         # Chama função para definir as margens e checar regra de custo
-                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos2, have_brinde, tipo)
+                        custo, margem_scapja, margem_soescap = calc.margem(custo, fab, linha, lista_codigos2, have_brinde, tipo, i)
 
 
                         # Calcula o valor de venda final para cada canal mas sem o MercadoEnvios

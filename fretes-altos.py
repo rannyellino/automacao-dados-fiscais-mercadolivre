@@ -21,7 +21,6 @@ import datetime
 import requests
 import datetime
 
-
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -246,7 +245,7 @@ def select_data(chrome):
     um_segundo()
 
     #DEFININDO DATA MANULAMENTE
-    date_yesterday = '21-04-2024'
+    date_yesterday = ('07-05-2024')
 
     # date_actual = datetime.datetime.today()
     # date_yesterday = date_actual - datetime.timedelta(days=1)
